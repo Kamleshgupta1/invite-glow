@@ -1,55 +1,41 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-
-interface EventType {
-  value: string;
-  label: string;
-  emoji: string;
-  defaultMessage: string;
-  theme: string;
-}
-
-const eventTypes: EventType[] = [
-  { value: 'birthday', label: 'Birthday', emoji: '🎂', defaultMessage: 'Wishing you a fantastic birthday filled with joy and happiness!', theme: 'card-birthday' },
-  { value: 'anniversary', label: 'Anniversary', emoji: '💍', defaultMessage: 'Celebrating your special day and the beautiful journey you share together!', theme: 'card-anniversary' },
-  { value: 'retirement', label: 'Retirement', emoji: '👴', defaultMessage: 'Congratulations on your well-deserved retirement! Enjoy this new chapter!', theme: 'card-retirement' },
-  { value: 'festival', label: 'Festival', emoji: '🎊', defaultMessage: 'May this festival bring you joy, prosperity, and wonderful memories!', theme: 'card-festival' },
-  { value: 'promotion', label: 'Promotion', emoji: '📈', defaultMessage: 'Congratulations on your promotion! Your hard work has truly paid off!', theme: 'card-promotion' },
-  { value: 'farewell', label: 'Farewell', emoji: '👋', defaultMessage: 'Wishing you all the best in your new journey. You will be missed!', theme: 'card-farewell' },
-  { value: 'graduation', label: 'Graduation', emoji: '🎓', defaultMessage: 'Congratulations graduate! Your achievements are truly inspiring!', theme: 'card-graduation' },
-  { value: 'custom', label: 'Custom', emoji: '✨', defaultMessage: 'Sending you warm wishes and positive vibes!', theme: 'card-custom' }
-];
-
-const animationStyles = [
-  { value: 'fade', label: 'Fade In' },
-  { value: 'slide', label: 'Slide In' },
-  { value: 'zoom', label: 'Zoom In' },
-  { value: 'flip', label: 'Flip In' },
-  { value: 'bounce', label: 'Bounce In' }
-];
+import { GreetingFormData, MediaItem, TextContent, EventType } from '@/types/greeting';
+import { eventTypes, animationStyles } from '@/data/eventTypes';
+import EventTypeSelector from '@/components/greeting/EventTypeSelector';
+import MediaUploader from '@/components/greeting/MediaUploader';
+import TextEditor from '@/components/greeting/TextEditor';
+import VideoUploader from '@/components/greeting/VideoUploader';
+import LayoutSelector from '@/components/greeting/LayoutSelector';
 
 const Create = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<GreetingFormData>({
     eventType: '',
     senderName: '',
     receiverName: '',
-    message1: '',
-    message2: '',
-    message3: '',
+    texts: [],
+    media: [],
+    videoUrl: '',
+    videoPosition: { x: 50, y: 50, width: 400, height: 300 },
+    audioUrl: '',
     animationStyle: 'fade',
     customCSS: '',
-    imageUrls: ['', '', ''],
-    audioUrl: ''
+    layout: 'grid',
+    theme: ''
   });
 
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);

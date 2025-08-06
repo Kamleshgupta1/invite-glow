@@ -47,6 +47,32 @@ All colors MUST be HSL.
     --farewell: 260 50% 55%;
     --graduation: 220 90% 50%;
     --custom: 280 60% 50%;
+    
+    /* Religious festival colors */
+    --diwali: 45 90% 55%;
+    --holi: 280 65% 55%;
+    --eid: 200 70% 45%;
+    --christmas: 120 40% 45%;
+    --navratri: 320 70% 50%;
+    --ramadan: 200 60% 40%;
+    --karwa-chauth: 280 50% 45%;
+    --raksha-bandhan: 25 80% 50%;
+    
+    /* National holiday colors */
+    --independence: 25 85% 50%;
+    --republic: 200 85% 45%;
+    --gandhi: 120 30% 40%;
+    
+    /* Seasonal festival colors */
+    --makar-sankranti: 50 90% 60%;
+    --baisakhi: 60 70% 50%;
+    --onam: 300 60% 50%;
+    --pongal: 45 80% 55%;
+    
+    /* Personal milestone colors */
+    --wedding: 340 65% 50%;
+    --baby: 200 70% 70%;
+    --home: 140 40% 45%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(340 75% 55%));
@@ -206,6 +232,168 @@ All colors MUST be HSL.
     border-left-color: hsl(var(--custom));
     background: linear-gradient(135deg, hsl(var(--custom) / 0.05), transparent);
   }
+
+  /* Religious festival cards */
+  .card-diwali {
+    @apply border-l-4;
+    border-left-color: hsl(var(--diwali));
+    background: linear-gradient(135deg, hsl(var(--diwali) / 0.05), transparent);
+  }
+  
+  .card-holi {
+    @apply border-l-4;
+    border-left-color: hsl(var(--holi));
+    background: linear-gradient(135deg, hsl(var(--holi) / 0.05), transparent);
+  }
+  
+  .card-eid {
+    @apply border-l-4;
+    border-left-color: hsl(var(--eid));
+    background: linear-gradient(135deg, hsl(var(--eid) / 0.05), transparent);
+  }
+  
+  .card-christmas {
+    @apply border-l-4;
+    border-left-color: hsl(var(--christmas));
+    background: linear-gradient(135deg, hsl(var(--christmas) / 0.05), transparent);
+  }
+  
+  .card-navratri {
+    @apply border-l-4;
+    border-left-color: hsl(var(--navratri));
+    background: linear-gradient(135deg, hsl(var(--navratri) / 0.05), transparent);
+  }
+  
+  .card-ramadan {
+    @apply border-l-4;
+    border-left-color: hsl(var(--ramadan));
+    background: linear-gradient(135deg, hsl(var(--ramadan) / 0.05), transparent);
+  }
+  
+  .card-karwa-chauth {
+    @apply border-l-4;
+    border-left-color: hsl(var(--karwa-chauth));
+    background: linear-gradient(135deg, hsl(var(--karwa-chauth) / 0.05), transparent);
+  }
+  
+  .card-raksha-bandhan {
+    @apply border-l-4;
+    border-left-color: hsl(var(--raksha-bandhan));
+    background: linear-gradient(135deg, hsl(var(--raksha-bandhan) / 0.05), transparent);
+  }
+
+  /* National holiday cards */
+  .card-independence {
+    @apply border-l-4;
+    border-left-color: hsl(var(--independence));
+    background: linear-gradient(135deg, hsl(var(--independence) / 0.05), transparent);
+  }
+  
+  .card-republic {
+    @apply border-l-4;
+    border-left-color: hsl(var(--republic));
+    background: linear-gradient(135deg, hsl(var(--republic) / 0.05), transparent);
+  }
+  
+  .card-gandhi {
+    @apply border-l-4;
+    border-left-color: hsl(var(--gandhi));
+    background: linear-gradient(135deg, hsl(var(--gandhi) / 0.05), transparent);
+  }
+
+  /* Seasonal festival cards */
+  .card-makar-sankranti {
+    @apply border-l-4;
+    border-left-color: hsl(var(--makar-sankranti));
+    background: linear-gradient(135deg, hsl(var(--makar-sankranti) / 0.05), transparent);
+  }
+  
+  .card-baisakhi {
+    @apply border-l-4;
+    border-left-color: hsl(var(--baisakhi));
+    background: linear-gradient(135deg, hsl(var(--baisakhi) / 0.05), transparent);
+  }
+  
+  .card-onam {
+    @apply border-l-4;
+    border-left-color: hsl(var(--onam));
+    background: linear-gradient(135deg, hsl(var(--onam) / 0.05), transparent);
+  }
+  
+  .card-pongal {
+    @apply border-l-4;
+    border-left-color: hsl(var(--pongal));
+    background: linear-gradient(135deg, hsl(var(--pongal) / 0.05), transparent);
+  }
+
+  /* Personal milestone cards */
+  .card-wedding {
+    @apply border-l-4;
+    border-left-color: hsl(var(--wedding));
+    background: linear-gradient(135deg, hsl(var(--wedding) / 0.05), transparent);
+  }
+  
+  .card-baby {
+    @apply border-l-4;
+    border-left-color: hsl(var(--baby));
+    background: linear-gradient(135deg, hsl(var(--baby) / 0.05), transparent);
+  }
+  
+  .card-home {
+    @apply border-l-4;
+    border-left-color: hsl(var(--home));
+    background: linear-gradient(135deg, hsl(var(--home) / 0.05), transparent);
+  }
+
+  /* Layout styles */
+  .layout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .layout-masonry {
+    columns: 3;
+    column-gap: 1rem;
+    break-inside: avoid;
+  }
+  
+  .layout-carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .layout-stack {
+    position: relative;
+  }
+  
+  .layout-collage {
+    position: relative;
+    min-height: 400px;
+  }
+
+  /* Advanced animations */
+  .animate-rotate-in {
+    animation: rotateIn 0.8s ease-out forwards;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .animate-shake {
+    animation: shake 0.6s ease-out forwards;
+  }
+  
+  .animate-swing {
+    animation: swing 1s ease-out forwards;
+  }
+  
+  .animate-tada {
+    animation: tada 1s ease-out forwards;
+  }
 }
 
 @keyframes fadeIn {
@@ -267,5 +455,73 @@ All colors MUST be HSL.
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-200deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-10px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes swing {
+  20% {
+    transform: rotate(15deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tada {
+  0% {
+    transform: scale(1);
+  }
+  10%, 20% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+  30%, 50%, 70%, 90% {
+    transform: scale(1.1) rotate(3deg);
+  }
+  40%, 60%, 80% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
   }
 }
