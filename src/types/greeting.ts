@@ -54,4 +54,29 @@ export interface GreetingFormData {
   customCSS: string;
   layout: 'grid' | 'masonry' | 'carousel' | 'stack' | 'collage';
   theme: string;
+  backgroundSettings: {
+    color: string;
+    gradient: {
+      enabled: boolean;
+      colors: [string, string];
+      direction: string;
+    };
+    animation: {
+      enabled: boolean;
+      type: string;
+      speed: number;
+      intensity: number;
+    };
+    pattern: {
+      enabled: boolean;
+      type: string;
+      opacity: number;
+    };
+  };
+  emojis: {
+    emoji: string;
+    position: { x: number; y: number };
+    size: number;
+    animation: string;
+  }[];
 }

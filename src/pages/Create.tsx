@@ -10,11 +10,13 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { GreetingFormData, MediaItem, TextContent, EventType } from '@/types/greeting';
 import { eventTypes, animationStyles } from '@/data/eventTypes';
-import EventTypeSelector from '@/components/greeting/EventTypeSelector';
-import MediaUploader from '@/components/greeting/MediaUploader';
-import TextEditor from '@/components/greeting/TextEditor';
+import CustomEventSelector from '@/components/greeting/CustomEventSelector';
+import AdvancedMediaUploader from '@/components/greeting/AdvancedMediaUploader';
+import AdvancedTextEditor from '@/components/greeting/AdvancedTextEditor';
 import VideoUploader from '@/components/greeting/VideoUploader';
 import LayoutSelector from '@/components/greeting/LayoutSelector';
+import BackgroundCustomizer from '@/components/greeting/BackgroundCustomizer';
+import EmojiSelector from '@/components/greeting/EmojiSelector';
 
 const Create = () => {
   const navigate = useNavigate();
@@ -35,17 +37,33 @@ const Create = () => {
     animationStyle: 'fade',
     customCSS: '',
     layout: 'grid',
-    theme: ''
+    theme: '',
+    backgroundSettings: {
+      color: '#ffffff',
+      gradient: { enabled: false, colors: ['#ffffff', '#000000'], direction: 'to right' },
+      animation: { enabled: false, type: 'stars', speed: 3, intensity: 50 },
+      pattern: { enabled: false, type: 'dots', opacity: 20 }
+    },
+    emojis: []
   });
 
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const [customEvent, setCustomEvent] = useState<EventType | null>(null);
 
   useEffect(() => {
     if (formData.eventType) {
       const event = eventTypes.find(e => e.value === formData.eventType);
       setSelectedEvent(event || null);
-      if (event && !formData.message1) {
-        setFormData(prev => ({ ...prev, message1: event.defaultMessage }));
+      if (event && formData.texts.length === 0) {
+        setFormData(prev => ({ 
+          ...prev, 
+          texts: [{ 
+            content: event.defaultMessage,
+            position: { x: 50, y: 50 },
+            style: { fontSize: '24px', fontWeight: 'normal', color: 'hsl(var(--foreground))', textAlign: 'center' },
+            animation: 'fade'
+          }]
+        }));
       }
     }
   }, [formData.eventType]);
@@ -54,10 +72,12 @@ const Create = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageChange = (index: number, value: string) => {
-    const newImageUrls = [...formData.imageUrls];
-    newImageUrls[index] = value;
-    setFormData(prev => ({ ...prev, imageUrls: newImageUrls }));
+  const handleMediaChange = (newMedia: MediaItem[]) => {
+    setFormData(prev => ({ ...prev, media: newMedia }));
+  };
+
+  const handleTextChange = (newTexts: TextContent[]) => {
+    setFormData(prev => ({ ...prev, texts: newTexts }));
   };
 
   const generateShareableURL = () => {
@@ -71,13 +91,16 @@ const Create = () => {
     }
 
     const params = new URLSearchParams();
+    // Add basic form data
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'imageUrls') {
-        (value as string[]).forEach((url: string, index: number) => {
-          if (url) params.append(`image${index + 1}`, url);
-        });
-      } else if (value) {
-        params.append(key, value as string);
+      if (key === 'texts' && Array.isArray(value)) {
+        params.append('texts', JSON.stringify(value));
+      } else if (key === 'media' && Array.isArray(value)) {
+        params.append('media', JSON.stringify(value));
+      } else if (key === 'videoPosition') {
+        params.append('videoPosition', JSON.stringify(value));
+      } else if (value && typeof value === 'string') {
+        params.append(key, value);
       }
     });
 
@@ -101,13 +124,16 @@ const Create = () => {
     }
 
     const params = new URLSearchParams();
+    // Add basic form data
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'imageUrls') {
-        (value as string[]).forEach((url: string, index: number) => {
-          if (url) params.append(`image${index + 1}`, url);
-        });
-      } else if (value) {
-        params.append(key, value as string);
+      if (key === 'texts' && Array.isArray(value)) {
+        params.append('texts', JSON.stringify(value));
+      } else if (key === 'media' && Array.isArray(value)) {
+        params.append('media', JSON.stringify(value));
+      } else if (key === 'videoPosition') {
+        params.append('videoPosition', JSON.stringify(value));
+      } else if (value && typeof value === 'string') {
+        params.append(key, value);
       }
     });
 
@@ -133,22 +159,13 @@ const Create = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Event Type */}
-              <div className="space-y-2">
-                <Label htmlFor="eventType">Event Type *</Label>
-                <Select value={formData.eventType} onValueChange={(value) => handleInputChange('eventType', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose an event type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {eventTypes.map((event) => (
-                      <SelectItem key={event.value} value={event.value}>
-                        {event.emoji} {event.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Custom Event Selector */}
+              <CustomEventSelector
+                selectedEvent={formData.eventType}
+                customEvent={customEvent}
+                onEventChange={(value) => handleInputChange('eventType', value)}
+                onCustomEventCreate={setCustomEvent}
+              />
 
               {/* Names */}
               <div className="grid md:grid-cols-2 gap-4">
@@ -172,39 +189,59 @@ const Create = () => {
                 </div>
               </div>
 
-              {/* Messages */}
-              <div className="space-y-4">
-                <Label>Messages</Label>
-                {[1, 2, 3].map((num) => (
-                  <div key={num} className="space-y-2">
-                    <Label htmlFor={`message${num}`}>Message {num} {num === 1 ? '(main message)' : '(optional)'}</Label>
-                    <Textarea
-                      id={`message${num}`}
-                      value={formData[`message${num}` as keyof typeof formData] as string}
-                      onChange={(e) => handleInputChange(`message${num}`, e.target.value)}
-                      placeholder={`Enter your ${num === 1 ? 'main' : 'additional'} message`}
-                      rows={3}
-                    />
-                  </div>
-                ))}
-              </div>
+              <Separator />
 
-              {/* Images */}
-              <div className="space-y-4">
-                <Label>Images (optional)</Label>
-                {[0, 1, 2].map((index) => (
-                  <div key={index} className="space-y-2">
-                    <Label htmlFor={`image${index + 1}`}>Image {index + 1} URL</Label>
-                    <Input
-                      id={`image${index + 1}`}
-                      value={formData.imageUrls[index]}
-                      onChange={(e) => handleImageChange(index, e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      type="url"
-                    />
-                  </div>
-                ))}
-              </div>
+              {/* Advanced Text Editor (up to 10 texts) */}
+              <AdvancedTextEditor
+                texts={formData.texts}
+                onChange={handleTextChange}
+              />
+
+              <Separator />
+
+              {/* Advanced Media Uploader (up to 20 images/videos) */}
+              <AdvancedMediaUploader
+                media={formData.media}
+                onChange={handleMediaChange}
+              />
+
+              <Separator />
+
+              {/* Background Customizer */}
+              <BackgroundCustomizer
+                settings={formData.backgroundSettings}
+                onChange={(settings) => setFormData(prev => ({ ...prev, backgroundSettings: settings }))}
+              />
+
+              <Separator />
+
+              {/* Emoji Decorator */}
+              <EmojiSelector
+                emojis={formData.emojis}
+                onChange={(emojis) => setFormData(prev => ({ ...prev, emojis }))}
+              />
+
+              <Separator />
+
+              {/* Video Uploader */}
+              <VideoUploader
+                videoUrl={formData.videoUrl}
+                videoPosition={formData.videoPosition}
+                onVideoUrlChange={(url) => handleInputChange('videoUrl', url)}
+                onPositionChange={(position) => setFormData(prev => ({ ...prev, videoPosition: position }))}
+              />
+
+              <Separator />
+
+              {/* Layout & Animation Selector */}
+              <LayoutSelector
+                layout={formData.layout}
+                animationStyle={formData.animationStyle}
+                onLayoutChange={(layout) => handleInputChange('layout', layout)}
+                onAnimationChange={(animation) => handleInputChange('animationStyle', animation)}
+              />
+
+              <Separator />
 
               {/* Audio */}
               <div className="space-y-2">
@@ -216,23 +253,6 @@ const Create = () => {
                   placeholder="https://example.com/music.mp3"
                   type="url"
                 />
-              </div>
-
-              {/* Animation Style */}
-              <div className="space-y-2">
-                <Label htmlFor="animationStyle">Animation Style</Label>
-                <Select value={formData.animationStyle} onValueChange={(value) => handleInputChange('animationStyle', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {animationStyles.map((style) => (
-                      <SelectItem key={style.value} value={style.value}>
-                        {style.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Custom CSS */}
@@ -249,10 +269,10 @@ const Create = () => {
               {/* Action Buttons */}
               <div className="flex gap-4 pt-4">
                 <Button onClick={previewGreeting} className="flex-1" variant="outline">
-                  👁️ Preview
+                  👁️ Preview Greeting
                 </Button>
                 <Button onClick={generateShareableURL} className="flex-1">
-                  🔗 Generate & Share
+                  ✨ Customize & Share with Others
                 </Button>
               </div>
             </CardContent>
@@ -284,35 +304,57 @@ const Create = () => {
 
                   {/* Messages */}
                   <div className="space-y-4">
-                    {formData.message1 && (
-                      <p className="text-lg leading-relaxed text-center bg-card/50 p-4 rounded-lg">
-                        {formData.message1}
-                      </p>
-                    )}
-                    {formData.message2 && (
-                      <p className="text-base leading-relaxed text-center bg-card/30 p-3 rounded-lg">
-                        {formData.message2}
-                      </p>
-                    )}
-                    {formData.message3 && (
-                      <p className="text-base leading-relaxed text-center bg-card/30 p-3 rounded-lg">
-                        {formData.message3}
-                      </p>
-                    )}
+                    {formData.texts.map((text, index) => (
+                      <div
+                        key={index}
+                        className={`text-center bg-card/50 p-4 rounded-lg animate-${text.animation}`}
+                        style={{
+                          fontSize: text.style.fontSize,
+                          fontWeight: text.style.fontWeight,
+                          color: text.style.color,
+                          textAlign: text.style.textAlign
+                        }}
+                      >
+                        {text.content}
+                      </div>
+                    ))}
                   </div>
 
                   {/* Images */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {formData.imageUrls.filter(url => url).map((url, index) => (
-                      <img
+                  <div className={`grid gap-4 ${
+                    formData.layout === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+                    formData.layout === 'masonry' ? 'columns-1 md:columns-2 lg:columns-3' :
+                    formData.layout === 'carousel' ? 'flex overflow-x-auto space-x-4' :
+                    formData.layout === 'stack' ? 'grid grid-cols-1' :
+                    'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  }`}>
+                    {formData.media.map((mediaItem, index) => (
+                      <div
                         key={index}
-                        src={url}
-                        alt={`Greeting image ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-lg shadow-md"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                        className={`animate-${mediaItem.animation} rounded-lg shadow-md overflow-hidden`}
+                        style={{
+                          width: `${mediaItem.position.width}px`,
+                          height: `${mediaItem.position.height}px`
                         }}
-                      />
+                      >
+                        {mediaItem.type === 'image' ? (
+                          <img
+                            src={mediaItem.url}
+                            alt={`Greeting image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <video
+                            src={mediaItem.url}
+                            className="w-full h-full object-cover"
+                            controls
+                            muted
+                          />
+                        )}
+                      </div>
                     ))}
                   </div>
 
