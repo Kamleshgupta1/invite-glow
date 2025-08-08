@@ -18,13 +18,14 @@ const AdvancedMediaUploader = ({ media, onChange }: AdvancedMediaUploaderProps) 
 
   const addMedia = (type: 'image' | 'video') => {
     if (media.length < 20) {
-      const newMedia: MediaItem = {
-        url: '',
-        type,
-        position: { x: 10, y: 10, width: 300, height: 200 },
-        animation: 'fade',
-        priority: media.length + 1
-      };
+    const newMedia: MediaItem = {
+      id: Date.now().toString(),
+      url: '',
+      type,
+      position: { x: 10, y: 10, width: 300, height: 200 },
+      animation: 'fade',
+      priority: media.length + 1
+    };
       onChange([...media, newMedia]);
     }
   };

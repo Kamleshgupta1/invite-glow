@@ -58,6 +58,7 @@ const Create = () => {
         setFormData(prev => ({ 
           ...prev, 
           texts: [{ 
+            id: Date.now().toString(),
             content: event.defaultMessage,
             position: { x: 50, y: 50 },
             style: { fontSize: '24px', fontWeight: 'normal', color: 'hsl(var(--foreground))', textAlign: 'center' },

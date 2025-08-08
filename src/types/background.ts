@@ -19,6 +19,7 @@ export interface BackgroundSettings {
 }
 
 export interface EmojiItem {
+  id: string;
   emoji: string;
   position: { x: number; y: number };
   size: number;

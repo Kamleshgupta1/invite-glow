@@ -18,6 +18,7 @@ const MediaUploader = ({ media, onChange }: MediaUploaderProps) => {
 
   const addMediaItem = () => {
     const newItem: MediaItem = {
+      id: Date.now().toString(),
       url: '',
       type: 'image',
       position: { x: 0, y: 0, width: 300, height: 200 },

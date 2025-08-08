@@ -19,6 +19,7 @@ const TextEditor = ({ texts, onChange }: TextEditorProps) => {
 
   const addTextContent = () => {
     const newText: TextContent = {
+      id: Date.now().toString(),
       content: '',
       position: { x: 50, y: 50 },
       style: {

@@ -19,17 +19,18 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
 
   const addText = () => {
     if (texts.length < 10) {
-      const newText: TextContent = {
-        content: '',
-        position: { x: 50, y: 50 },
-        style: {
-          fontSize: '18px',
-          fontWeight: 'normal',
-          color: 'hsl(var(--foreground))',
-          textAlign: 'center'
-        },
-        animation: 'fade'
-      };
+    const newText: TextContent = {
+      id: Date.now().toString(),
+      content: '',
+      position: { x: 50, y: 50 },
+      style: {
+        fontSize: '18px',
+        fontWeight: 'normal',
+        color: 'hsl(var(--foreground))',
+        textAlign: 'center'
+      },
+      animation: 'fade'
+    };
       onChange([...texts, newText]);
     }
   };

@@ -25,6 +25,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
 
   const addEmoji = (selectedEmoji?: string) => {
     const newEmoji: EmojiItem = {
+      id: Date.now().toString(),
       emoji: selectedEmoji || '🎉',
       position: { x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 },
       size: 24,

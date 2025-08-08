@@ -9,6 +9,7 @@ export interface EventType {
 }
 
 export interface MediaItem {
+  id: string;
   url: string;
   type: 'image' | 'video';
   position: {
@@ -22,6 +23,7 @@ export interface MediaItem {
 }
 
 export interface TextContent {
+  id: string;
   content: string;
   position: {
     x: number;
@@ -74,6 +76,7 @@ export interface GreetingFormData {
     };
   };
   emojis: {
+    id: string;
     emoji: string;
     position: { x: number; y: number };
     size: number;
