@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { GreetingFormData, MediaItem, TextContent, EventType } from '@/types/greeting';
+import { BorderSettings } from '@/types/background';
 import { eventTypes, animationStyles } from '@/data/eventTypes';
 import CustomEventSelector from '@/components/greeting/CustomEventSelector';
 import AdvancedMediaUploader from '@/components/greeting/AdvancedMediaUploader';
@@ -17,6 +18,10 @@ import VideoUploader from '@/components/greeting/VideoUploader';
 import LayoutSelector from '@/components/greeting/LayoutSelector';
 import BackgroundCustomizer from '@/components/greeting/BackgroundCustomizer';
 import EmojiSelector from '@/components/greeting/EmojiSelector';
+import BorderCustomizer from '@/components/border/BorderCustomizer';
+import LanguageSelector from '@/components/language/LanguageSelector';
+import ShareActions from '@/components/share/ShareActions';
+import DragDropEditor from '@/components/visual-editor/DragDropEditor';
 
 const Create = () => {
   const navigate = useNavigate();
@@ -44,11 +49,23 @@ const Create = () => {
       animation: { enabled: false, type: 'stars', speed: 3, intensity: 50 },
       pattern: { enabled: false, type: 'dots', opacity: 20 }
     },
-    emojis: []
+    emojis: [],
+    borderSettings: {
+      enabled: false,
+      style: 'solid',
+      width: 2,
+      color: '#000000',
+      radius: 0,
+      animation: { enabled: false, type: 'none', speed: 3 },
+      elements: [],
+      decorativeElements: []
+    }
   });
 
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
   const [customEvent, setCustomEvent] = useState<EventType | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [showVisualEditor, setShowVisualEditor] = useState(false);
 
   useEffect(() => {
     if (formData.eventType) {
@@ -216,6 +233,14 @@ const Create = () => {
 
               <Separator />
 
+              {/* Border Customizer */}
+              <BorderCustomizer
+                settings={formData.borderSettings}
+                onChange={(borderSettings) => setFormData(prev => ({ ...prev, borderSettings }))}
+              />
+
+              <Separator />
+
               {/* Emoji Decorator */}
               <EmojiSelector
                 emojis={formData.emojis}
@@ -267,12 +292,31 @@ const Create = () => {
                 />
               </div>
 
+              {/* Language Selector */}
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <LanguageSelector 
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={setCurrentLanguage}
+                />
+              </div>
+
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <Button onClick={previewGreeting} className="flex-1" variant="outline">
-                  👁️ Preview Greeting
-                </Button>
-                <Button onClick={generateShareableURL} className="flex-1">
+              <div className="flex flex-col gap-4 pt-4">
+                <div className="flex gap-4">
+                  <Button onClick={previewGreeting} className="flex-1" variant="outline">
+                    👁️ Preview Greeting
+                  </Button>
+                  <Button 
+                    onClick={() => setShowVisualEditor(!showVisualEditor)} 
+                    className="flex-1" 
+                    variant="secondary"
+                  >
+                    🎨 Visual Editor
+                  </Button>
+                </div>
+                <ShareActions greetingData={formData} />
+                <Button onClick={generateShareableURL} className="w-full">
                   ✨ Customize & Share with Others
                 </Button>
               </div>
@@ -287,7 +331,12 @@ const Create = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {formData.eventType ? (
+              {showVisualEditor && formData.eventType ? (
+                <DragDropEditor 
+                  greetingData={formData}
+                  onUpdate={setFormData}
+                />
+              ) : formData.eventType ? (
                 <div className={`space-y-6 ${formData.animationStyle === 'fade' ? 'animate-fade-in' : 
                                               formData.animationStyle === 'slide' ? 'animate-slide-in' :
                                               formData.animationStyle === 'zoom' ? 'animate-zoom-in' :

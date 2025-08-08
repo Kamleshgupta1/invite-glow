@@ -25,3 +25,14 @@ export interface EmojiItem {
   size: number;
   animation: string;
 }
+
+export interface BorderSettings {
+  enabled: boolean;
+  style: string;
+  width: number;
+  color: string;
+  radius: number;
+  animation: { enabled: boolean; type: string; speed: number };
+  elements: any[];
+  decorativeElements: any[];
+}

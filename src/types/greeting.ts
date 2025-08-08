@@ -1,3 +1,5 @@
+import { BorderSettings } from '@/types/background';
+
 export interface EventType {
   value: string;
   label: string;
@@ -82,4 +84,5 @@ export interface GreetingFormData {
     size: number;
     animation: string;
   }[];
+  borderSettings: BorderSettings;
 }
