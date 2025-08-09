@@ -57,8 +57,7 @@ const Create = () => {
       color: '#000000',
       radius: 0,
       animation: { enabled: false, type: 'none', speed: 3 },
-      elements: [],
-      decorativeElements: []
+      elements: []
     }
   });
 

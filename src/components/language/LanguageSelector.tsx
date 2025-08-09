@@ -24,11 +24,11 @@ const languages: Language[] = [
 ];
 
 interface LanguageSelectorProps {
-  selectedLanguage: string;
-  onChange: (language: string) => void;
+  currentLanguage: string;
+  onLanguageChange: (language: string) => void;
 }
 
-const LanguageSelector = ({ selectedLanguage, onChange }: LanguageSelectorProps) => {
+const LanguageSelector = ({ currentLanguage, onLanguageChange }: LanguageSelectorProps) => {
   const [detectedLanguage, setDetectedLanguage] = useState('en');
 
   useEffect(() => {
@@ -37,14 +37,14 @@ const LanguageSelector = ({ selectedLanguage, onChange }: LanguageSelectorProps)
     const supportedLanguage = languages.find(lang => lang.code === browserLanguage);
     if (supportedLanguage) {
       setDetectedLanguage(browserLanguage);
-      onChange(browserLanguage);
+      onLanguageChange(browserLanguage);
     }
-  }, [onChange]);
+  }, [onLanguageChange]);
 
   return (
     <div className="flex items-center gap-2">
       <Globe className="h-4 w-4 text-muted-foreground" />
-      <Select value={selectedLanguage} onValueChange={onChange}>
+      <Select value={currentLanguage} onValueChange={onLanguageChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select language" />
         </SelectTrigger>

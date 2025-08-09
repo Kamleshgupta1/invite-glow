@@ -34,5 +34,4 @@ export interface BorderSettings {
   radius: number;
   animation: { enabled: boolean; type: string; speed: number };
   elements: any[];
-  decorativeElements: any[];
 }

@@ -10,12 +10,12 @@ import { MousePointer, Undo, Redo, Trash2, Copy, Move } from 'lucide-react';
 import { TextContent, MediaItem } from '@/types/greeting';
 
 interface DragDropEditorProps {
-  texts: TextContent[];
-  media: MediaItem[];
-  emojis: any[];
-  onTextsChange: (texts: TextContent[]) => void;
-  onMediaChange: (media: MediaItem[]) => void;
-  onEmojisChange: (emojis: any[]) => void;
+  greetingData: {
+    texts: TextContent[];
+    media: MediaItem[];
+    emojis: any[];
+  };
+  onUpdate: (data: any) => void;
 }
 
 interface DragItem {
@@ -26,13 +26,10 @@ interface DragItem {
 }
 
 const DragDropEditor = ({
-  texts,
-  media,
-  emojis,
-  onTextsChange,
-  onMediaChange,
-  onEmojisChange
+  greetingData,
+  onUpdate
 }: DragDropEditorProps) => {
+  const { texts, media, emojis } = greetingData;
   const [selectedItem, setSelectedItem] = useState<DragItem | null>(null);
   const [dragHistory, setDragHistory] = useState<any[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -65,25 +62,25 @@ const DragDropEditor = ({
           ? { ...text, position: { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) } }
           : text
       );
-      onTextsChange(updatedTexts);
+      onUpdate({ ...greetingData, texts: updatedTexts });
     } else if (dragData.type === 'media') {
       const updatedMedia = media.map(item =>
         item.id === dragData.id
           ? { ...item, position: { ...item.position, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) } }
           : item
       );
-      onMediaChange(updatedMedia);
+      onUpdate({ ...greetingData, media: updatedMedia });
     } else if (dragData.type === 'emoji') {
       const updatedEmojis = emojis.map(emoji =>
         emoji.id === dragData.id
           ? { ...emoji, position: { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) } }
           : emoji
       );
-      onEmojisChange(updatedEmojis);
+      onUpdate({ ...greetingData, emojis: updatedEmojis });
     }
 
     setSelectedItem(null);
-  }, [texts, media, emojis, onTextsChange, onMediaChange, onEmojisChange]);
+  }, [texts, media, emojis, greetingData, onUpdate]);
 
   const updateSelectedItem = (field: string, value: any) => {
     if (!selectedItem) return;
@@ -94,21 +91,21 @@ const DragDropEditor = ({
           ? { ...text, [field]: value }
           : text
       );
-      onTextsChange(updatedTexts);
+      onUpdate({ ...greetingData, texts: updatedTexts });
     } else if (selectedItem.type === 'media') {
       const updatedMedia = media.map(item =>
         item.id === selectedItem.id
           ? { ...item, [field]: value }
           : item
       );
-      onMediaChange(updatedMedia);
+      onUpdate({ ...greetingData, media: updatedMedia });
     } else if (selectedItem.type === 'emoji') {
       const updatedEmojis = emojis.map(emoji =>
         emoji.id === selectedItem.id
           ? { ...emoji, [field]: value }
           : emoji
       );
-      onEmojisChange(updatedEmojis);
+      onUpdate({ ...greetingData, emojis: updatedEmojis });
     }
   };
 
@@ -116,11 +113,11 @@ const DragDropEditor = ({
     if (!selectedItem) return;
 
     if (selectedItem.type === 'text') {
-      onTextsChange(texts.filter(text => text.id !== selectedItem.id));
+      onUpdate({ ...greetingData, texts: texts.filter(text => text.id !== selectedItem.id) });
     } else if (selectedItem.type === 'media') {
-      onMediaChange(media.filter(item => item.id !== selectedItem.id));
+      onUpdate({ ...greetingData, media: media.filter(item => item.id !== selectedItem.id) });
     } else if (selectedItem.type === 'emoji') {
-      onEmojisChange(emojis.filter(emoji => emoji.id !== selectedItem.id));
+      onUpdate({ ...greetingData, emojis: emojis.filter(emoji => emoji.id !== selectedItem.id) });
     }
 
     setSelectedItem(null);
@@ -137,7 +134,7 @@ const DragDropEditor = ({
           id: Date.now().toString(),
           position: { x: originalText.position.x + 5, y: originalText.position.y + 5 }
         };
-        onTextsChange([...texts, newText]);
+        onUpdate({ ...greetingData, texts: [...texts, newText] });
       }
     } else if (selectedItem.type === 'media') {
       const originalMedia = media.find(item => item.id === selectedItem.id);
@@ -147,7 +144,7 @@ const DragDropEditor = ({
           id: Date.now().toString(),
           position: { ...originalMedia.position, x: originalMedia.position.x + 5, y: originalMedia.position.y + 5 }
         };
-        onMediaChange([...media, newMedia]);
+        onUpdate({ ...greetingData, media: [...media, newMedia] });
       }
     } else if (selectedItem.type === 'emoji') {
       const originalEmoji = emojis.find(emoji => emoji.id === selectedItem.id);
@@ -157,7 +154,7 @@ const DragDropEditor = ({
           id: Date.now().toString(),
           position: { x: originalEmoji.position.x + 5, y: originalEmoji.position.y + 5 }
         };
-        onEmojisChange([...emojis, newEmoji]);
+        onUpdate({ ...greetingData, emojis: [...emojis, newEmoji] });
       }
     }
   };
