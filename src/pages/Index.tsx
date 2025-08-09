@@ -29,7 +29,7 @@ const Index = () => {
         videoPosition: params.get('videoPosition') ? JSON.parse(params.get('videoPosition')!) : { x: 50, y: 50, width: 400, height: 300 },
         audioUrl: params.get('audioUrl') || '',
         animationStyle: params.get('animationStyle') || 'fade',
-        customCSS: params.get('customCSS') || '',
+        
         layout: (params.get('layout') as any) || 'grid',
         theme: params.get('theme') || '',
         backgroundSettings: params.get('backgroundSettings') ? JSON.parse(params.get('backgroundSettings')!) : {
@@ -46,6 +46,7 @@ const Index = () => {
           color: '#000000',
           radius: 0,
           animation: { enabled: false, type: 'none', speed: 3 },
+          elements: [],
           decorativeElements: []
         }
       };
@@ -106,13 +107,6 @@ const Index = () => {
   if (greetingData && greetingData.eventType) {
     return (
       <div className={`min-h-screen p-4 ${getBackgroundClasses()}`}>
-        {/* Language Selector */}
-        <div className="fixed top-4 right-4 z-50">
-          <LanguageSelector 
-            currentLanguage={currentLanguage}
-            onLanguageChange={setCurrentLanguage}
-          />
-        </div>
 
         {/* Background Audio */}
         {greetingData.audioUrl && (
@@ -165,8 +159,8 @@ const Index = () => {
                                             greetingData.animationStyle === 'rotate' ? 'animate-rotate-in' :
                                             greetingData.animationStyle === 'shake' ? 'animate-shake' :
                                             greetingData.animationStyle === 'swing' ? 'animate-swing' :
-                                            greetingData.animationStyle === 'tada' ? 'animate-tada' :
-                                            'animate-bounce-in'} ${greetingData.customCSS}`}>
+                                             greetingData.animationStyle === 'tada' ? 'animate-tada' :
+                                             'animate-bounce-in'}`}>
                 
                 {/* Event Header */}
                 <div className="text-center">

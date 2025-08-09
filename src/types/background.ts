@@ -34,4 +34,14 @@ export interface BorderSettings {
   radius: number;
   animation: { enabled: boolean; type: string; speed: number };
   elements: any[];
+  decorativeElements: BorderElement[];
+}
+
+export interface BorderElement {
+  id: string;
+  type: 'image' | 'emoji';
+  content: string;
+  position: number;
+  size: number;
+  animation: string;
 }

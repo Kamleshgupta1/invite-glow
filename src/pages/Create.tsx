@@ -22,6 +22,7 @@ import BorderCustomizer from '@/components/border/BorderCustomizer';
 import LanguageSelector from '@/components/language/LanguageSelector';
 import ShareActions from '@/components/share/ShareActions';
 import DragDropEditor from '@/components/visual-editor/DragDropEditor';
+import LivePreview from '@/components/greeting/LivePreview';
 
 const Create = () => {
   const navigate = useNavigate();
@@ -40,7 +41,6 @@ const Create = () => {
     videoPosition: { x: 50, y: 50, width: 400, height: 300 },
     audioUrl: '',
     animationStyle: 'fade',
-    customCSS: '',
     layout: 'grid',
     theme: '',
     backgroundSettings: {
@@ -57,7 +57,8 @@ const Create = () => {
       color: '#000000',
       radius: 0,
       animation: { enabled: false, type: 'none', speed: 3 },
-      elements: []
+      elements: [],
+      decorativeElements: []
     }
   });
 
@@ -280,23 +281,12 @@ const Create = () => {
                 />
               </div>
 
-              {/* Custom CSS */}
-              <div className="space-y-2">
-                <Label htmlFor="customCSS">Custom CSS Class (optional)</Label>
-                <Input
-                  id="customCSS"
-                  value={formData.customCSS}
-                  onChange={(e) => handleInputChange('customCSS', e.target.value)}
-                  placeholder="custom-class-name"
-                />
-              </div>
-
               {/* Language Selector */}
               <div className="space-y-2">
                 <Label>Language</Label>
                 <LanguageSelector 
-                  currentLanguage={currentLanguage}
-                  onLanguageChange={setCurrentLanguage}
+                  value={currentLanguage}
+                  onChange={setCurrentLanguage}
                 />
               </div>
 
@@ -336,85 +326,7 @@ const Create = () => {
                   onUpdate={setFormData}
                 />
               ) : formData.eventType ? (
-                <div className={`space-y-6 ${formData.animationStyle === 'fade' ? 'animate-fade-in' : 
-                                              formData.animationStyle === 'slide' ? 'animate-slide-in' :
-                                              formData.animationStyle === 'zoom' ? 'animate-zoom-in' :
-                                              formData.animationStyle === 'flip' ? 'animate-flip-in' :
-                                              'animate-bounce-in'} ${formData.customCSS}`}>
-                  
-                  {/* Event Header */}
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">{selectedEvent?.emoji}</div>
-                    <h2 className="text-3xl font-bold mb-2">{selectedEvent?.label}</h2>
-                    {formData.receiverName && (
-                      <p className="text-xl text-muted-foreground">For {formData.receiverName}</p>
-                    )}
-                  </div>
-
-                  {/* Messages */}
-                  <div className="space-y-4">
-                    {formData.texts.map((text, index) => (
-                      <div
-                        key={index}
-                        className={`text-center bg-card/50 p-4 rounded-lg animate-${text.animation}`}
-                        style={{
-                          fontSize: text.style.fontSize,
-                          fontWeight: text.style.fontWeight,
-                          color: text.style.color,
-                          textAlign: text.style.textAlign
-                        }}
-                      >
-                        {text.content}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Images */}
-                  <div className={`grid gap-4 ${
-                    formData.layout === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
-                    formData.layout === 'masonry' ? 'columns-1 md:columns-2 lg:columns-3' :
-                    formData.layout === 'carousel' ? 'flex overflow-x-auto space-x-4' :
-                    formData.layout === 'stack' ? 'grid grid-cols-1' :
-                    'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-                  }`}>
-                    {formData.media.map((mediaItem, index) => (
-                      <div
-                        key={index}
-                        className={`animate-${mediaItem.animation} rounded-lg shadow-md overflow-hidden`}
-                        style={{
-                          width: `${mediaItem.position.width}px`,
-                          height: `${mediaItem.position.height}px`
-                        }}
-                      >
-                        {mediaItem.type === 'image' ? (
-                          <img
-                            src={mediaItem.url}
-                            alt={`Greeting image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <video
-                            src={mediaItem.url}
-                            className="w-full h-full object-cover"
-                            controls
-                            muted
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Sender */}
-                  {formData.senderName && (
-                    <div className="text-center pt-4 border-t">
-                      <p className="text-sm text-muted-foreground">From</p>
-                      <p className="text-lg font-semibold">{formData.senderName}</p>
-                    </div>
-                  )}
-                </div>
+                <LivePreview greetingData={formData} showVisualEditor={showVisualEditor} />
               ) : (
                 <div className="text-center text-muted-foreground py-12">
                   <div className="text-4xl mb-4">🎨</div>

@@ -42,6 +42,7 @@ export interface TextContent {
 
 export interface GreetingFormData {
   eventType: string;
+  customEventName?: string;
   senderName: string;
   receiverName: string;
   texts: TextContent[];
@@ -55,7 +56,6 @@ export interface GreetingFormData {
   };
   audioUrl: string;
   animationStyle: string;
-  customCSS: string;
   layout: 'grid' | 'masonry' | 'carousel' | 'stack' | 'collage';
   theme: string;
   backgroundSettings: {
