@@ -15,6 +15,8 @@ interface BorderCustomizerProps {
 }
 
 const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
+  console.log('BorderCustomizer settings:', settings);
+  console.log('decorativeElements type:', typeof settings.decorativeElements, settings.decorativeElements);
   const updateSettings = (field: keyof BorderSettings, value: any) => {
     if (typeof settings[field] === 'object' && settings[field] !== null) {
       onChange({ ...settings, [field]: { ...settings[field] as object, ...value } });
@@ -24,7 +26,8 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
   };
 
   const addBorderElement = () => {
-    if ((settings.decorativeElements || []).length >= 5) return;
+    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
+    if (elements.length >= 5) return;
     
     const newElement: BorderElement = {
       id: Date.now().toString(),
@@ -35,15 +38,17 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
       animation: 'float'
     };
     
-    updateSettings('decorativeElements', [...(settings.decorativeElements || []), newElement]);
+    updateSettings('decorativeElements', [...elements, newElement]);
   };
 
   const removeBorderElement = (id: string) => {
-    updateSettings('decorativeElements', (settings.decorativeElements || []).filter(el => el.id !== id));
+    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
+    updateSettings('decorativeElements', elements.filter(el => el.id !== id));
   };
 
   const updateBorderElement = (id: string, field: keyof BorderElement, value: any) => {
-    const updatedElements = (settings.decorativeElements || []).map(el =>
+    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
+    const updatedElements = elements.map(el =>
       el.id === id ? { ...el, [field]: value } : el
     );
     updateSettings('decorativeElements', updatedElements);
@@ -113,18 +118,18 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
             {/* Border Elements */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Border Elements ({(settings.decorativeElements || []).length}/5)</Label>
+                <Label>Border Elements ({Array.isArray(settings.decorativeElements) ? settings.decorativeElements.length : 0}/5)</Label>
                 <Button
                   size="sm"
                   onClick={addBorderElement}
-                  disabled={(settings.decorativeElements || []).length >= 5}
+                  disabled={Array.isArray(settings.decorativeElements) ? settings.decorativeElements.length >= 5 : false}
                   className="h-8"
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>
               
-              {(settings.decorativeElements || []).map((element) => (
+              {Array.isArray(settings.decorativeElements) ? settings.decorativeElements.map((element) => (
                 <div key={element.id} className="border rounded p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <Select
@@ -156,7 +161,7 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
                     className="text-xs"
                   />
                 </div>
-              ))}
+              )) : null}
             </div>
           </>
         )}
