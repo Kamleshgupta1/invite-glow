@@ -24,7 +24,7 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
   };
 
   const addBorderElement = () => {
-    if (settings.decorativeElements.length >= 5) return;
+    if ((settings.decorativeElements || []).length >= 5) return;
     
     const newElement: BorderElement = {
       id: Date.now().toString(),
@@ -35,15 +35,15 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
       animation: 'float'
     };
     
-    updateSettings('decorativeElements', [...settings.decorativeElements, newElement]);
+    updateSettings('decorativeElements', [...(settings.decorativeElements || []), newElement]);
   };
 
   const removeBorderElement = (id: string) => {
-    updateSettings('decorativeElements', settings.decorativeElements.filter(el => el.id !== id));
+    updateSettings('decorativeElements', (settings.decorativeElements || []).filter(el => el.id !== id));
   };
 
   const updateBorderElement = (id: string, field: keyof BorderElement, value: any) => {
-    const updatedElements = settings.decorativeElements.map(el =>
+    const updatedElements = (settings.decorativeElements || []).map(el =>
       el.id === id ? { ...el, [field]: value } : el
     );
     updateSettings('decorativeElements', updatedElements);
@@ -113,18 +113,18 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
             {/* Border Elements */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Border Elements ({settings.decorativeElements.length}/5)</Label>
+                <Label>Border Elements ({(settings.decorativeElements || []).length}/5)</Label>
                 <Button
                   size="sm"
                   onClick={addBorderElement}
-                  disabled={settings.decorativeElements.length >= 5}
+                  disabled={(settings.decorativeElements || []).length >= 5}
                   className="h-8"
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>
               
-              {settings.decorativeElements.map((element) => (
+              {(settings.decorativeElements || []).map((element) => (
                 <div key={element.id} className="border rounded p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <Select
