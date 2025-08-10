@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { GreetingFormData, MediaItem, TextContent, EventType } from '@/types/greeting';
 import { BorderSettings } from '@/types/background';
@@ -23,6 +24,9 @@ import LanguageSelector from '@/components/language/LanguageSelector';
 import ShareActions from '@/components/share/ShareActions';
 import DragDropEditor from '@/components/visual-editor/DragDropEditor';
 import LivePreview from '@/components/greeting/LivePreview';
+import SEOManager from '@/components/seo/SEOManager';
+import BackButton from '@/components/ui/back-button';
+import { Palette, Eye, Wand2, Share2 } from 'lucide-react';
 
 const Create = () => {
   const navigate = useNavigate();
@@ -160,7 +164,28 @@ const Create = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
-      <div className="max-w-6xl mx-auto">
+      <SEOManager 
+        eventType={formData.eventType}
+        customEventName={formData.customEventName}
+        isPreview={false}
+      />
+      
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <BackButton to="/" className="bg-background/80 backdrop-blur">
+          Back to Home
+        </BackButton>
+      </div>
+
+      {/* Language Selector */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSelector 
+          value={currentLanguage}
+          onChange={setCurrentLanguage}
+        />
+      </div>
+
+      <div className="max-w-6xl mx-auto pt-16">
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             ✨ Create Your Greeting
@@ -281,33 +306,52 @@ const Create = () => {
                 />
               </div>
 
-              {/* Language Selector */}
-              <div className="space-y-2">
-                <Label>Language</Label>
-                <LanguageSelector 
-                  value={currentLanguage}
-                  onChange={setCurrentLanguage}
-                />
-              </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-4 pt-4">
-                <div className="flex gap-4">
-                  <Button onClick={previewGreeting} className="flex-1" variant="outline">
-                    👁️ Preview Greeting
-                  </Button>
-                  <Button 
-                    onClick={() => setShowVisualEditor(!showVisualEditor)} 
-                    className="flex-1" 
-                    variant="secondary"
-                  >
-                    🎨 Visual Editor
-                  </Button>
-                </div>
-                <ShareActions greetingData={formData} />
-                <Button onClick={generateShareableURL} className="w-full">
-                  ✨ Customize & Share with Others
-                </Button>
+                <Tabs defaultValue="customize" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="customize" className="flex items-center gap-1">
+                      <Palette className="h-4 w-4" />
+                      Customize
+                    </TabsTrigger>
+                    <TabsTrigger value="preview" className="flex items-center gap-1">
+                      <Eye className="h-4 w-4" />
+                      Preview
+                    </TabsTrigger>
+                    <TabsTrigger value="visual" className="flex items-center gap-1">
+                      <Wand2 className="h-4 w-4" />
+                      Visual Editor
+                    </TabsTrigger>
+                    <TabsTrigger value="share" className="flex items-center gap-1">
+                      <Share2 className="h-4 w-4" />
+                      Share
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="preview" className="space-y-2">
+                    <Button onClick={previewGreeting} className="w-full" variant="outline">
+                      👁️ Preview Greeting
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="visual" className="space-y-2">
+                    <Button 
+                      onClick={() => setShowVisualEditor(!showVisualEditor)} 
+                      className="w-full" 
+                      variant="secondary"
+                    >
+                      🎨 Toggle Visual Editor
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="share" className="space-y-2">
+                    <ShareActions greetingData={formData} />
+                    <Button onClick={generateShareableURL} className="w-full">
+                      ✨ Generate Share Link
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </div>
             </CardContent>
           </Card>

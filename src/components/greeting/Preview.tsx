@@ -120,9 +120,11 @@ const Preview = ({ greetingData }: PreviewProps) => {
               
               {/* Event Header */}
               <div className="text-center">
-                <div className="text-8xl md:text-9xl mb-6 animate-bounce-in">{currentEvent?.emoji}</div>
+                <div className="text-8xl md:text-9xl mb-6 animate-bounce-in">{currentEvent?.emoji || '🎉'}</div>
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {currentEvent?.value === 'custom' && greetingData.customEventName ? greetingData.customEventName : currentEvent?.label}
+                  {greetingData.eventType === 'custom' && greetingData.customEventName 
+                    ? greetingData.customEventName 
+                    : currentEvent?.label || 'Celebration'}
                 </h1>
                 {greetingData.receiverName && (
                   <p className="text-2xl md:text-3xl text-muted-foreground mb-2">For</p>

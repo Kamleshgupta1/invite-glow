@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { MousePointer, Undo, Redo, Trash2, Copy, Move } from 'lucide-react';
+import { MousePointer, Undo, Redo, Trash2, Copy, Move, ArrowLeft } from 'lucide-react';
 import { TextContent, MediaItem } from '@/types/greeting';
 
 interface DragDropEditorProps {
@@ -170,12 +171,24 @@ const DragDropEditor = ({
     { value: 'swing', label: 'Swing' }
   ];
 
+  const navigate = useNavigate();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm flex items-center gap-2">
-          <MousePointer className="h-4 w-4" />
-          Visual Editor
+        <CardTitle className="text-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MousePointer className="h-4 w-4" />
+            Visual Editor
+          </div>
+          <Button 
+            onClick={() => navigate(-1)}
+            variant="outline"
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
         </CardTitle>
         <div className="flex gap-2">
           <Button size="sm" variant="outline">

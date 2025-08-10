@@ -70,27 +70,44 @@ const ShareActions = ({ greetingData, greetingRef }: ShareActionsProps) => {
   };
 
   const saveAsImage = async () => {
-    if (!greetingRef?.current) return;
+    if (!greetingRef?.current) {
+      toast({
+        title: "Error",
+        description: "No greeting content to save.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsGenerating(true);
     try {
+      // Add a small delay to ensure all elements are rendered
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const canvas = await html2canvas(greetingRef.current, {
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: false,
+        foreignObjectRendering: true,
+        logging: false,
+        width: greetingRef.current.scrollWidth,
+        height: greetingRef.current.scrollHeight
       });
       
       const link = document.createElement('a');
-      link.download = 'greeting-card.png';
-      link.href = canvas.toDataURL();
+      link.download = `greeting-card-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       
       toast({
         title: "Image saved!",
         description: "Your greeting has been saved as an image.",
       });
     } catch (error) {
+      console.error('Error saving image:', error);
       toast({
         title: "Error",
         description: "Failed to save image. Please try again.",
@@ -101,32 +118,54 @@ const ShareActions = ({ greetingData, greetingRef }: ShareActionsProps) => {
   };
 
   const saveAsPDF = async () => {
-    if (!greetingRef?.current) return;
+    if (!greetingRef?.current) {
+      toast({
+        title: "Error",
+        description: "No greeting content to save.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsGenerating(true);
     try {
+      // Add a small delay to ensure all elements are rendered
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const canvas = await html2canvas(greetingRef.current, {
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: false,
+        foreignObjectRendering: true,
+        logging: false,
+        width: greetingRef.current.scrollWidth,
+        height: greetingRef.current.scrollHeight
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      // Calculate PDF dimensions to fit content
+      const pdfWidth = imgWidth * 0.75; // Convert px to pt (1px = 0.75pt)
+      const pdfHeight = imgHeight * 0.75;
+      
       const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
+        orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+        unit: 'pt',
+        format: [pdfWidth, pdfHeight]
       });
       
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('greeting-card.pdf');
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`greeting-card-${Date.now()}.pdf`);
       
       toast({
         title: "PDF saved!",
         description: "Your greeting has been saved as a PDF.",
       });
     } catch (error) {
+      console.error('Error saving PDF:', error);
       toast({
         title: "Error",
         description: "Failed to save PDF. Please try again.",

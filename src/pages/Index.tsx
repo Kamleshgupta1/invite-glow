@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GreetingFormData } from '@/types/greeting';
 import { eventTypes } from '@/data/eventTypes';
 import ShareActions from '@/components/share/ShareActions';
-import LanguageSelector from '@/components/language/LanguageSelector';
+import SEOManager from '@/components/seo/SEOManager';
 
 const Index = () => {
   const location = useLocation();
@@ -272,6 +272,10 @@ const Index = () => {
   // Show landing page if no greeting data
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+      <SEOManager 
+        eventType="greeting"
+        isPreview={false}
+      />
       <div className="max-w-4xl mx-auto text-center">
         <div className="animate-fade-in">
           <div className="text-8xl mb-8 animate-bounce-in">🎉</div>
