@@ -11,7 +11,7 @@ const LanguageSelector = ({ value, onChange }: LanguageSelectorProps) => {
   const { languages } = useLanguageTranslation();
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <Globe className="h-4 w-4 text-muted-foreground" />
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="w-[200px]">

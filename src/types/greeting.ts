@@ -27,10 +27,6 @@ export interface MediaItem {
 export interface TextContent {
   id: string;
   content: string;
-  position: {
-    x: number;
-    y: number;
-  };
   style: {
     fontSize: string;
     fontWeight: string;

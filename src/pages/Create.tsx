@@ -15,18 +15,19 @@ import { eventTypes, animationStyles } from '@/data/eventTypes';
 import CustomEventSelector from '@/components/greeting/CustomEventSelector';
 import AdvancedMediaUploader from '@/components/greeting/AdvancedMediaUploader';
 import AdvancedTextEditor from '@/components/greeting/AdvancedTextEditor';
-import VideoUploader from '@/components/greeting/VideoUploader';
 import LayoutSelector from '@/components/greeting/LayoutSelector';
 import BackgroundCustomizer from '@/components/greeting/BackgroundCustomizer';
 import EmojiSelector from '@/components/greeting/EmojiSelector';
 import BorderCustomizer from '@/components/border/BorderCustomizer';
 import LanguageSelector from '@/components/language/LanguageSelector';
 import ShareActions from '@/components/share/ShareActions';
-import DragDropEditor from '@/components/visual-editor/DragDropEditor';
 import LivePreview from '@/components/greeting/LivePreview';
+import Preview from '@/components/greeting/Preview';
 import SEOManager from '@/components/seo/SEOManager';
 import BackButton from '@/components/ui/back-button';
 import { Palette, Eye, Wand2, Share2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
 
 const Create = () => {
   const navigate = useNavigate();
@@ -70,29 +71,69 @@ const Create = () => {
   const [customEvent, setCustomEvent] = useState<EventType | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [showVisualEditor, setShowVisualEditor] = useState(false);
+  // Add to your existing state declarations
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  useEffect(() => {
-    if (formData.eventType) {
-      const event = eventTypes.find(e => e.value === formData.eventType);
-      setSelectedEvent(event || null);
-      if (event && formData.texts.length === 0) {
-        setFormData(prev => ({ 
-          ...prev, 
-          texts: [{ 
-            id: Date.now().toString(),
-            content: event.defaultMessage,
-            position: { x: 50, y: 50 },
-            style: { fontSize: '24px', fontWeight: 'normal', color: 'hsl(var(--foreground))', textAlign: 'center' },
-            animation: 'fade'
-          }]
-        }));
-      }
+  const handlePreviewClick = () => {
+  if (!formData.eventType) {
+    toast({
+      title: "Please select an event type",
+      description: "Event type is required to preview the greeting.",
+      variant: "destructive"
+    });
+    return;
+  }
+  setIsPreviewOpen(true);
+};
+
+  
+useEffect(() => {
+  if (formData.eventType) {
+    // Check both predefined and custom events
+    const event = [...eventTypes, ...(customEvent ? [customEvent] : [])]
+      .find(e => e.value === formData.eventType);
+    
+    setSelectedEvent(event || null);
+    
+    if (event && formData.texts.length === 0) {
+      setFormData(prev => ({ 
+        ...prev, 
+        texts: [{ 
+          id: Date.now().toString(),
+          content: event.defaultMessage,
+          position: { x: 50, y: 50 },
+          style: { 
+            fontSize: '24px', 
+            fontWeight: 'normal', 
+            color: 'hsl(var(--foreground))', 
+            textAlign: 'center' 
+          },
+          animation: 'fade'
+        }]
+      }));
     }
-  }, [formData.eventType]);
+  }
+}, [formData.eventType, customEvent]); // Add customEvent to dependencies
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  setFormData(prev => {
+    const newData = { ...prev, [field]: value };
+    
+    // Special handling for eventType changes
+    if (field === 'eventType') {
+      // Find the event in either predefined or custom events
+      const event = [...eventTypes, ...(customEvent ? [customEvent] : [])]
+        .find(e => e.value === value);
+      
+      return { 
+        ...newData,
+        theme: event?.theme || ''
+      };
+    }
+    
+    return newData;
+  });
+};
 
   const handleMediaChange = (newMedia: MediaItem[]) => {
     setFormData(prev => ({ ...prev, media: newMedia }));
@@ -160,39 +201,37 @@ const Create = () => {
     });
 
     navigate(`/?${params.toString()}`);
+    
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
-      <SEOManager 
-        eventType={formData.eventType}
-        customEventName={formData.customEventName}
-        isPreview={false}
-      />
+    <div className="bg-gradient-to-br from-primary/10 via-background to-secondary/20 py-2">
+    
       
       {/* Back Button */}
-      <div className="fixed top-4 left-4 z-50">
+      <div className="flex justify-between items-center w-full mt-4">
         <BackButton to="/" className="bg-background/80 backdrop-blur">
           Back to Home
         </BackButton>
-      </div>
-
-      {/* Language Selector */}
-      <div className="fixed top-4 right-4 z-50">
+        
         <LanguageSelector 
           value={currentLanguage}
           onChange={setCurrentLanguage}
         />
       </div>
 
+
+
+
       <div className="max-w-6xl mx-auto pt-16">
         <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-violet-500 hover:bg-gradient-to-l bg-clip-text text-transparent">
             ✨ Create Your Greeting
           </h1>
-          <p className="text-lg text-muted-foreground">Design a beautiful, personalized greeting to share with someone special</p>
+           <p className="text-lg md:text-xl text-muted-foreground font-medium animate-typing overflow-hidden  border-r-4 border-r-primary">
+            Design a beautiful, personalized greeting to share with someone special
+          </p>
         </div>
-
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Form Section */}
           <Card className="animate-slide-in shadow-xl">
@@ -201,17 +240,33 @@ const Create = () => {
                 🎨 Customize Your Greeting
               </CardTitle>
             </CardHeader>
+
+
             <CardContent className="space-y-6">
+
               {/* Custom Event Selector */}
               <CustomEventSelector
                 selectedEvent={formData.eventType}
                 customEvent={customEvent}
-                onEventChange={(value) => handleInputChange('eventType', value)}
-                onCustomEventCreate={setCustomEvent}
+                onEventChange={(value) => {
+                  handleInputChange('eventType', value);
+                  // Also update selectedEvent state
+                  const event = [...eventTypes, ...(customEvent ? [customEvent] : [])]
+                    .find(e => e.value === value);
+                  setSelectedEvent(event || null);
+                }}
+                onCustomEventCreate={(newEvent) => {
+                  setCustomEvent(newEvent);
+                  // Automatically select the new custom event
+                  handleInputChange('eventType', newEvent.value);
+                  setSelectedEvent(newEvent);
+                }}
               />
 
+              <Separator />
+
               {/* Names */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4 p-6 border border-green-300 rounded-xl shadow-lg">
                 <div className="space-y-2">
                   <Label htmlFor="senderName">Your Name (optional)</Label>
                   <Input
@@ -250,6 +305,28 @@ const Create = () => {
 
               <Separator />
 
+              {/* Emoji Decorator */}
+              <EmojiSelector
+                emojis={formData.emojis}
+                onChange={(emojis) => setFormData(prev => ({ ...prev, emojis }))}
+              />
+
+              <Separator />
+
+              {/* Audio */}
+              <div className="space-y-2 p-6 border border-red-300 rounded-xl shadow-lg">
+                <Label htmlFor="audioUrl">Background Music URL (optional)</Label>
+                <Input
+                  id="audioUrl"
+                  value={formData.audioUrl}
+                  onChange={(e) => handleInputChange('audioUrl', e.target.value)}
+                  placeholder="https://example.com/music.mp3"
+                  type="url"
+                />
+              </div>
+
+              <Separator />
+
               {/* Background Customizer */}
               <BackgroundCustomizer
                 settings={formData.backgroundSettings}
@@ -266,24 +343,6 @@ const Create = () => {
 
               <Separator />
 
-              {/* Emoji Decorator */}
-              <EmojiSelector
-                emojis={formData.emojis}
-                onChange={(emojis) => setFormData(prev => ({ ...prev, emojis }))}
-              />
-
-              <Separator />
-
-              {/* Video Uploader */}
-              <VideoUploader
-                videoUrl={formData.videoUrl}
-                videoPosition={formData.videoPosition}
-                onVideoUrlChange={(url) => handleInputChange('videoUrl', url)}
-                onPositionChange={(position) => setFormData(prev => ({ ...prev, videoPosition: position }))}
-              />
-
-              <Separator />
-
               {/* Layout & Animation Selector */}
               <LayoutSelector
                 layout={formData.layout}
@@ -293,92 +352,76 @@ const Create = () => {
               />
 
               <Separator />
-
-              {/* Audio */}
-              <div className="space-y-2">
-                <Label htmlFor="audioUrl">Background Music URL (optional)</Label>
-                <Input
-                  id="audioUrl"
-                  value={formData.audioUrl}
-                  onChange={(e) => handleInputChange('audioUrl', e.target.value)}
-                  placeholder="https://example.com/music.mp3"
-                  type="url"
-                />
-              </div>
-
-
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-4 pt-4">
-                <Tabs defaultValue="customize" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="customize" className="flex items-center gap-1">
-                      <Palette className="h-4 w-4" />
-                      Customize
-                    </TabsTrigger>
-                    <TabsTrigger value="preview" className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      Preview
-                    </TabsTrigger>
-                    <TabsTrigger value="visual" className="flex items-center gap-1">
-                      <Wand2 className="h-4 w-4" />
-                      Visual Editor
-                    </TabsTrigger>
-                    <TabsTrigger value="share" className="flex items-center gap-1">
-                      <Share2 className="h-4 w-4" />
-                      Share
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="preview" className="space-y-2">
-                    <Button onClick={previewGreeting} className="w-full" variant="outline">
-                      👁️ Preview Greeting
-                    </Button>
-                  </TabsContent>
-                  
-                  <TabsContent value="visual" className="space-y-2">
-                    <Button 
-                      onClick={() => setShowVisualEditor(!showVisualEditor)} 
-                      className="w-full" 
-                      variant="secondary"
-                    >
-                      🎨 Toggle Visual Editor
-                    </Button>
-                  </TabsContent>
-                  
-                  <TabsContent value="share" className="space-y-2">
-                    <ShareActions greetingData={formData} />
-                    <Button onClick={generateShareableURL} className="w-full">
+          
+              <div className="flex flex-col items-center gap-4 pt-8">
+                  <ShareActions greetingData={formData} />
+                      <Button onClick={generateShareableURL} className="w-full">
                       ✨ Generate Share Link
-                    </Button>
-                  </TabsContent>
-                </Tabs>
+                    </Button>   
               </div>
             </CardContent>
           </Card>
 
-          {/* Live Preview Section */}
-          <Card className={`animate-zoom-in shadow-xl ${selectedEvent?.theme || ''}`}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                👀 Live Preview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {showVisualEditor && formData.eventType ? (
-                <DragDropEditor 
-                  greetingData={formData}
-                  onUpdate={setFormData}
-                />
-              ) : formData.eventType ? (
-                <LivePreview greetingData={formData} showVisualEditor={showVisualEditor} />
-              ) : (
-                <div className="text-center text-muted-foreground py-12">
-                  <div className="text-4xl mb-4">🎨</div>
-                  <p>Select an event type to see your greeting preview</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          
+        {/* Live Preview Section */}
+<Card 
+  className={`px-2 animate-zoom-in shadow-xl ${selectedEvent?.theme || ''} 
+              transition-all duration-300 hover:shadow-2xl hover:scale-[1.01]`}
+ 
+>
+<CardHeader className="relative overflow-hidden group">
+  {/* Animated background gradient */}
+  <div className="absolute inset-0 bg-gradient-to-r from-pink-200 to-violet-200 hover:bg-gradient-to-l text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+  {/* Sparkle particles */}
+  {[...Array(5)].map((_, i) => (
+    <div
+      key={i}
+      className="absolute text-xl opacity-0 group-hover:opacity-100 group-hover:animate-float"
+      style={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${i * 0.2}s`
+      }}
+    >
+      ✨
+    </div>
+  ))}
+
+  <CardTitle  onClick={handlePreviewClick} className="cursor-pointer flex items-center gap-2 relative z-10">
+    {/* Animated eye icon */}
+    <span className="inline-block group-hover:animate-bounce">    
+     👀 Live Preview (Click to Expand)
+    </span>
+  </CardTitle>
+</CardHeader>
+  <CardContent>
+    {formData.eventType ? (
+      <LivePreview greetingData={formData} selectedEvent={selectedEvent} showVisualEditor={showVisualEditor} />
+    ) : (
+      <div className="text-center text-muted-foreground py-12">
+        <div className="text-4xl mb-4">🎨</div>
+        <p>Select an event type to see your greeting preview</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
+{isPreviewOpen && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="relative max-w-6xl w-full max-h-[90vh] overflow-auto">
+      <Button 
+        onClick={() => setIsPreviewOpen(false)}
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4 z-50 bg-background/80 backdrop-blur"
+      >
+        ✕
+      </Button>
+      <Preview greetingData={formData} selectedEvent={selectedEvent} />
+    </div>
+  </div>
+)}
         </div>
       </div>
     </div>

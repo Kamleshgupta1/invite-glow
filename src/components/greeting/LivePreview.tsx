@@ -1,16 +1,40 @@
 import React from 'react';
-import { GreetingFormData } from '@/types/greeting';
+import { GreetingFormData, EventType } from '@/types/greeting';
 import { eventTypes } from '@/data/eventTypes';
 import { useLanguageTranslation } from '@/hooks/useLanguageTranslation';
 
 interface LivePreviewProps {
   greetingData: GreetingFormData;
   showVisualEditor?: boolean;
+  selectedEvent?: EventType | null;
 }
 
-const LivePreview = ({ greetingData, showVisualEditor = false }: LivePreviewProps) => {
+const LivePreview = ({ 
+  greetingData, 
+  showVisualEditor = false,
+  selectedEvent = null 
+}: LivePreviewProps) => {
   const { translate } = useLanguageTranslation();
-  const selectedEvent = eventTypes.find(e => e.value === greetingData.eventType);
+
+  // Get the current event (either predefined, custom, or fallback)
+  const getCurrentEvent = (): EventType => {
+    if (selectedEvent) return selectedEvent;
+    
+    const predefinedEvent = eventTypes.find(e => e.value === greetingData.eventType);
+    if (predefinedEvent) return predefinedEvent;
+
+    // Fallback event with all required properties
+    return {
+      value: 'fallback',
+      emoji: '🎉',
+      label: 'Celebration',
+      defaultMessage: 'Wishing you a wonderful celebration!',
+      theme: '',
+      category: 'custom'
+    };
+  };
+
+  const currentEvent = getCurrentEvent();
 
   // Generate background classes based on settings
   const getBackgroundClasses = () => {
@@ -88,7 +112,7 @@ const LivePreview = ({ greetingData, showVisualEditor = false }: LivePreviewProp
   };
 
   return (
-    <div className={`relative ${getBackgroundClasses()}`}>
+    <div className={`relative ${getBackgroundClasses()} ${currentEvent.theme || ''}`}>
       {/* Background Elements */}
       {greetingData.emojis.map((emoji) => (
         <div
@@ -120,13 +144,10 @@ const LivePreview = ({ greetingData, showVisualEditor = false }: LivePreviewProp
         {/* Event Header */}
         <div className="text-center">
           <div className="text-4xl md:text-6xl mb-4 animate-bounce-in">
-            {selectedEvent?.emoji}
+            {currentEvent.emoji}
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            {selectedEvent?.value === 'custom' && greetingData.customEventName 
-              ? greetingData.customEventName 
-              : selectedEvent?.label
-            }
+            {currentEvent.label}
           </h2>
           {greetingData.receiverName && (
             <>
@@ -195,19 +216,6 @@ const LivePreview = ({ greetingData, showVisualEditor = false }: LivePreviewProp
                   )}
                 </div>
               ))}
-          </div>
-        )}
-
-        {/* Background Video */}
-        {greetingData.videoUrl && (
-          <div className="relative rounded-lg overflow-hidden shadow-lg">
-            <video
-              src={greetingData.videoUrl}
-              className="w-full h-auto max-h-64 object-cover"
-              controls
-              muted
-              preload="metadata"
-            />
           </div>
         )}
 

@@ -3,18 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
-import { GreetingFormData } from '@/types/greeting';
+import { GreetingFormData, EventType } from '@/types/greeting';
 import { eventTypes } from '@/data/eventTypes';
 import ShareActions from '@/components/share/ShareActions';
 
 interface PreviewProps {
   greetingData: GreetingFormData;
+  selectedEvent: EventType | null;
 }
 
-const Preview = ({ greetingData }: PreviewProps) => {
+const Preview = ({ greetingData, selectedEvent }: PreviewProps) => {
   const navigate = useNavigate();
   const greetingRef = useRef<HTMLDivElement>(null);
-  const currentEvent = eventTypes.find(e => e.value === greetingData.eventType);
 
   // Generate background classes based on settings
   const getBackgroundClasses = () => {
@@ -46,21 +46,28 @@ const Preview = ({ greetingData }: PreviewProps) => {
     return classes;
   };
 
+  // Get the current event (either predefined or custom)
+const getCurrentEvent = () => {
+  if (selectedEvent) return selectedEvent;
+  
+  const predefinedEvent = eventTypes.find(e => e.value === greetingData.eventType);
+  if (predefinedEvent) return predefinedEvent;
+
+  // Return a complete fallback event with all required properties
+  return {
+    value: 'fallback',
+    emoji: '🎉',
+    label: 'Celebration',
+    defaultMessage: 'Wishing you a wonderful celebration!',
+    theme: '',
+    category: 'custom'
+  };
+};
+
+  const currentEvent = getCurrentEvent();
+
   return (
     <div className={`min-h-screen p-4 ${getBackgroundClasses()}`}>
-      {/* Back Button */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button 
-          onClick={() => navigate('/create', { state: { formData: greetingData } })}
-          variant="outline"
-          size="sm"
-          className="bg-background/80 backdrop-blur"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Edit
-        </Button>
-      </div>
-
       {/* Background Audio */}
       {greetingData.audioUrl && (
         <audio autoPlay loop className="hidden">
@@ -122,9 +129,7 @@ const Preview = ({ greetingData }: PreviewProps) => {
               <div className="text-center">
                 <div className="text-8xl md:text-9xl mb-6 animate-bounce-in">{currentEvent?.emoji || '🎉'}</div>
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {greetingData.eventType === 'custom' && greetingData.customEventName 
-                    ? greetingData.customEventName 
-                    : currentEvent?.label || 'Celebration'}
+                  {currentEvent.label}
                 </h1>
                 {greetingData.receiverName && (
                   <p className="text-2xl md:text-3xl text-muted-foreground mb-2">For</p>

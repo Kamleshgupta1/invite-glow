@@ -55,7 +55,7 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
   };
 
   return (
-    <Card>
+    <Card className="border border-gray-300 rounded-xl shadow-lg">
       <CardHeader>
         <CardTitle className="text-sm flex items-center gap-2">
           <Frame className="h-4 w-4" />

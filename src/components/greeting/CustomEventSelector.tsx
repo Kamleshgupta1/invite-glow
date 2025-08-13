@@ -54,30 +54,36 @@ const CustomEventSelector = ({
     custom: '✨ Custom Events'
   };
 
-  const handleCustomEventSubmit = () => {
-    if (customEventData.label && customEventData.emoji && customEventData.defaultMessage) {
-      const newEvent: EventType = {
-        value: customEventData.label?.toLowerCase().replace(/\s+/g, '-') || 'custom',
-        label: customEventData.label,
-        emoji: customEventData.emoji,
-        defaultMessage: customEventData.defaultMessage,
-        theme: 'card-custom',
-        category: 'custom'
-      };
-      
-      onCustomEventCreate(newEvent);
-      onEventChange(newEvent.value);
-      setShowCustomForm(false);
-      setCustomEventData({
-        value: '',
-        label: '',
-        emoji: '🎉',
-        defaultMessage: '',
-        theme: 'card-custom',
-        category: 'custom'
-      });
-    }
+ const handleCustomEventSubmit = () => {
+  if (!customEventData.label || !customEventData.emoji || !customEventData.defaultMessage) {
+    return; // Validation failed
+  }
+
+  const newEvent: EventType = {
+    value: customEventData.label.toLowerCase().replace(/\s+/g, '-'),
+    label: customEventData.label,
+    emoji: customEventData.emoji,
+    defaultMessage: customEventData.defaultMessage,
+    theme: 'card-custom',
+    category: 'custom'
   };
+
+  // Clear the form
+  setCustomEventData({
+    value: '',
+    label: '',
+    emoji: '🎉',
+    defaultMessage: '',
+    theme: 'card-custom',
+    category: 'custom'
+  });
+
+  // Pass the new event up
+  onCustomEventCreate(newEvent);
+  // Select the new event
+  onEventChange(newEvent.value);
+  setShowCustomForm(false);
+};
 
   const popularEmojis = [
     '🎉', '🎊', '🎈', '🎁', '🌟', '✨', '💫', '⭐',
@@ -85,7 +91,7 @@ const CustomEventSelector = ({
   ];
 
   return (
-    <Card>
+    <Card className="border border-blue-300 rounded-xl shadow-lg">
       <CardHeader>
         <CardTitle className="text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -205,24 +211,47 @@ const CustomEventSelector = ({
 
         {/* Event Preview */}
         {selectedEvent && (
-          <div className="p-3 bg-muted/50 rounded-lg">
-            <Label className="text-xs text-muted-foreground">Selected Event:</Label>
-            {(() => {
-              const event = allEvents.find(e => e.value === selectedEvent);
-              return event ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-2xl">{event.emoji}</span>
-                  <div>
-                    <p className="font-medium">{event.label}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {event.defaultMessage}
-                    </p>
-                  </div>
-                </div>
-              ) : null;
-            })()}
-          </div>
-        )}
+  <div className="p-3 bg-muted/50 rounded-lg">
+    <Label className="text-xs text-muted-foreground">Selected Event:</Label>
+    <div className="flex items-center gap-2 mt-1">
+      {(() => {
+        // First check in predefined events
+        let event = eventTypes.find(e => e.value === selectedEvent);
+        
+        // If not found, check if it's the custom event
+        if (!event && customEvent && customEvent.value === selectedEvent) {
+          event = customEvent;
+        }
+        
+        // If still not found, check if it matches the current custom form data
+        if (!event && showCustomForm && customEventData.label) {
+          event = {
+            value: customEventData.label.toLowerCase().replace(/\s+/g, '-'),
+            label: customEventData.label,
+            emoji: customEventData.emoji,
+            defaultMessage: customEventData.defaultMessage || '',
+            theme: 'card-custom',
+            category: 'custom'
+          };
+        }
+
+        return event ? (
+          <>
+            <span className="text-2xl">{event.emoji}</span>
+            <div>
+              <p className="font-medium">{event.label}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {event.defaultMessage}
+              </p>
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">No event selected</p>
+        );
+      })()}
+    </div>
+  </div>
+)}
       </CardContent>
     </Card>
   );
