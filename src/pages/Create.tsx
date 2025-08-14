@@ -322,20 +322,6 @@ useEffect(() => {
 
               <Separator />
 
-              {/* Audio */}
-              <div className="space-y-2 p-6 border border-red-300 rounded-xl shadow-lg">
-                <Label htmlFor="audioUrl">Background Music URL (optional)</Label>
-                <Input
-                  id="audioUrl"
-                  value={formData.audioUrl}
-                  onChange={(e) => handleInputChange('audioUrl', e.target.value)}
-                  placeholder="https://example.com/music.mp3"
-                  type="url"
-                />
-              </div>
-
-              <Separator />
-
               {/* Background Customizer */}
               <BackgroundCustomizer
                 settings={formData.backgroundSettings}
