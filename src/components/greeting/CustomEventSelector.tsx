@@ -201,6 +201,7 @@ const CustomEventSelector = ({
                   onClick={() => setShowCustomForm(false)}
                   size="sm"
                   variant="ghost"
+                   className="bg-red-100 hover:bg-red-200 text-red-600"
                 >
                   Cancel
                 </Button>

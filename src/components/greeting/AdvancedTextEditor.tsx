@@ -104,10 +104,12 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
             onClick={addText}
             disabled={texts.length >= MAX_TEXT_LIMIT}
             size="sm"
-            variant={texts.length === 0 ? "default" : "outline"}
+            variant='outline'
+            //  variant={texts.length === 0 ? "default" : "outline"}
             className={cn(
               "transition-all duration-300",
-              texts.length === 0 ? "gap-2 bg-primary/50 hover:bg-primary/90" : "gap-1",
+              texts.length === 0 ? "gap-2" : "gap-1",
+              // texts.length === 0 ? "gap-2 bg-primary/50 hover:bg-primary/90" : "gap-1",
               isAddingText && "animate-pulse"
             )}
           >
@@ -132,7 +134,7 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
             <div className="flex flex-col items-center justify-center">
               <Type className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-muted-foreground mb-3">No text content added yet</p>
-              <Button onClick={addText} variant="default" size="sm" className="gap-2">
+              <Button onClick={addText} variant="outline" size="sm" className="bg-primary/10 text-primary gap-2">
                 <Sparkles className="h-3 w-3" />
                 Start Adding Text
               </Button>

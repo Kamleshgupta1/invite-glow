@@ -27,6 +27,7 @@ import SEOManager from '@/components/seo/SEOManager';
 import BackButton from '@/components/ui/back-button';
 import { Palette, Eye, Wand2, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguageTranslation } from '@/hooks/useLanguageTranslation';
 
 
 const Create = () => {
@@ -35,6 +36,7 @@ const Create = () => {
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { translate } = useLanguageTranslation();
   
   const [formData, setFormData] = useState<GreetingFormData>({
     eventType: '',
@@ -200,6 +202,7 @@ useEffect(() => {
       }
     });
 
+    
     navigate(`/?${params.toString()}`);
     
   };
@@ -214,10 +217,8 @@ useEffect(() => {
           Back to Home
         </BackButton>
         
-        <LanguageSelector 
-          value={currentLanguage}
-          onChange={setCurrentLanguage}
-        />
+        <LanguageSelector />
+        
       </div>
 
 
@@ -226,7 +227,7 @@ useEffect(() => {
       <div className="max-w-6xl mx-auto pt-16">
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-2xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-violet-500 hover:bg-gradient-to-l bg-clip-text text-transparent">
-            ✨ Create Your Greeting
+            ✨ {translate('Create Your Greeting')}
           </h1>
            <p className="text-lg md:text-xl text-muted-foreground font-medium animate-typing overflow-hidden  border-r-4 border-r-primary">
             Design a beautiful, personalized greeting to share with someone special
@@ -256,9 +257,17 @@ useEffect(() => {
                   setSelectedEvent(event || null);
                 }}
                 onCustomEventCreate={(newEvent) => {
-                  setCustomEvent(newEvent);
-                  // Automatically select the new custom event
-                  handleInputChange('eventType', newEvent.value);
+                   setCustomEvent(newEvent);
+                  // Update formData with custom event details
+                  // setFormData(prev => ({
+                  //   ...prev,
+                  //   eventType: newEvent.value,
+                  //   customEventName: newEvent.label,
+                  //   customEventEmoji: newEvent.emoji,
+                  //   theme: newEvent.theme || ''
+                  // }));
+                  
+                   handleInputChange('eventType', newEvent.value);
                   setSelectedEvent(newEvent);
                 }}
               />
@@ -355,9 +364,28 @@ useEffect(() => {
           
               <div className="flex flex-col items-center gap-4 pt-8">
                   <ShareActions greetingData={formData} />
-                      <Button onClick={generateShareableURL} className="w-full">
-                      ✨ Generate Share Link
-                    </Button>   
+                      
+                    <Button
+                      size="lg"
+                      onClick={generateShareableURL}
+                      className="relative overflow-hidden group animate-zoom-in shadow-2xl hover:shadow-primary/30 transition-all duration-500 bg-gradient-to-r from-pink-500 to-violet-500 hover:bg-gradient-to-l"
+                    >
+                      <span className="relative z-10 flex items-center">
+                        <span className="mr-3 text-2xl group-hover:animate-spin">✨</span>
+                        <span>Generate Share Link</span>
+                      </span>
+                      {/* Button shine effect */}
+                        <span className="absolute top-0 left-1/2 w-20 h-full bg-white/30 -skew-x-12 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:animate-shine transition-opacity duration-700"></span>
+                        
+                        {/* Border elements */}
+                        <span className="absolute inset-0 border-2 border-transparent group-hover:border-white/30 rounded-lg 
+                                        group-hover:rounded-none transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
+                        
+                        {/* Lightning border animation */}
+                        <span className="absolute inset-0 border-2 border-transparent 
+                                        group-hover:border-[length:400%_400%] group-hover:bg-[length:400%_400%]
+                                        group-hover:animate-lightning-rounding" />
+                      </Button>
               </div>
             </CardContent>
           </Card>

@@ -37,7 +37,8 @@ const LayoutSelector = ({
               {layoutStyles.map((style) => (
                 <SelectItem key={style.value} value={style.value}>
                   <div>
-                    <div>{style.label}</div>
+                    <div>{style.label}</div> 
+                    {/* className="flex justify-start" */}
                     <div className="text-xs text-muted-foreground">
                       {layoutDescriptions[style.value as keyof typeof layoutDescriptions]}
                     </div>

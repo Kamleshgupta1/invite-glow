@@ -7,7 +7,7 @@ export interface EventType {
   defaultMessage: string;
   theme: string;
   backgroundImage?: string;
-  category: 'birthday' | 'religious' | 'national' | 'seasonal' | 'personal' | 'custom';
+  category: 'birthday' | 'religious' | 'national' | 'seasonal' | 'personal' | 'special' | 'custom';
 }
 
 export interface MediaItem {
@@ -39,6 +39,7 @@ export interface TextContent {
 export interface GreetingFormData {
   eventType: string;
   customEventName?: string;
+  customEventEmoji?: string;
   senderName: string;
   receiverName: string;
   texts: TextContent[];

@@ -58,7 +58,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
         <CardTitle className="text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Smile className="h-4 w-4" />
-            Decorative Emojis ({emojis.length})
+            Decorative Emojis <span className="bg-primary/10 text-primary">({emojis.length})</span>
           </div>
           <Button
             onClick={() => setShowPicker(!showPicker)}
@@ -121,10 +121,11 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
             <p>No decorative emojis added yet</p>
             <Button
               onClick={() => setShowPicker(true)}
-              className="mt-2 bg-primary "
+              className="mt-2 bg-primary/10 text-primary"
               size="sm"
+               variant="outline" 
             >
-              Add Your First Emoji
+             🌹 Add Your First Emoji
             </Button>
           </div>
         )}

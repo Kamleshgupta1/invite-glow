@@ -57,6 +57,33 @@ const ShareActions = ({ greetingData, greetingRef }: ShareActionsProps) => {
     if (shareURL) window.open(shareURL, '_blank');
   };
 
+    const shareGreeting = async () => {
+    const shareableURL = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    
+    if (navigator.share && navigator.canShare) {
+      try {
+        await navigator.share({
+          title: 'Beautiful Greeting',
+          text: 'Check out this beautiful greeting!',
+          url: shareableURL
+        });
+      } catch (error) {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(shareableURL);
+        toast({
+          title: "Link copied!",
+          description: "Greeting URL copied to clipboard",
+        });
+      }
+    } else {
+      await navigator.clipboard.writeText(shareableURL);
+      toast({
+        title: "Link copied!",
+        description: "Greeting URL copied to clipboard",
+      });
+    }
+  };
+
   const ensureContentLoaded = async (element: HTMLElement) => {
     // Wait for fonts to load
     await document.fonts.ready;
@@ -236,35 +263,59 @@ const saveAsPDF = async () => {
 
   return (
     <>
-      <div className="flex flex-nowrap items-center justify-center gap-2 overflow-x-auto py-2 w-full no-capture">
-        <Button 
-          onClick={() => setShareDialogOpen(true)} 
-          className="shrink-0 flex items-center gap-2 px-4"
-        >
-          <Share2 className="h-4 w-4" />
-          <span className="whitespace-nowrap">Share</span>
-        </Button>
+    <Card className="w-full border-dashed border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 no-capture">
+      <CardContent className="p-4">
+        <div className="text-center mb-4">
+          <h3 className="font-semibold text-lg mb-2">Save & Share</h3>
+          <p className="text-sm text-muted-foreground">
+            Download your greeting or share it with others
+          </p>
+        </div>
+      <div className="flex flex-nowrap items-center justify-center gap-1 overflow-x-auto  ">
 
         <Button 
-          variant="outline" 
           onClick={saveAsImage} 
           disabled={isGenerating}
-          className="shrink-0 flex items-center gap-2 px-4"
+          className="shrink-0 flex items-center gap-1 px-3 md:px-4 bg-blue-600 hover:bg-blue-700"
         >
           <FileImage className="h-4 w-4" />
-          <span className="hidden sm:inline whitespace-nowrap">Save as Image</span>
+          <span className="hidden sm:inline whitespace-nowrap">Save Image</span>
         </Button>
 
         <Button 
-          variant="outline" 
           onClick={saveAsPDF} 
           disabled={isGenerating}
-          className="shrink-0 flex items-center gap-2 px-4"
+          className="shrink-0 flex items-center gap-1 px-3 md:px-4 bg-red-600 hover:bg-red-700"
         >
           <FileText className="h-4 w-4" />
-          <span className="hidden sm:inline whitespace-nowrap">Save as PDF</span>
+          <span className="hidden sm:inline whitespace-nowrap">Save PDF</span>
         </Button>
+
+
+ <Button
+            onClick={generateQRCode} 
+            disabled={isGenerating}
+            className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
+          >
+           <QrCode className="h-4 w-4" />
+                 <span className="hidden sm:inline whitespace-nowrap"> QR Code</span>
+          </Button>
+
+
+                <Button 
+          // onClick={() => setShareDialogOpen(true)} 
+          onClick={shareGreeting}
+          className="shrink-0 flex items-center gap-1 px-4"
+        >
+          <Share2 className="h-4 w-4" />
+           <span className="hidden sm:inline whitespace-nowrap">Share</span>
+          <span className="whitespace-nowrap">Link</span>
+        </Button>
+
       </div>
+ </CardContent>
+    </Card>
+
 
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="max-w-md">

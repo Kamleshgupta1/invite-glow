@@ -151,6 +151,91 @@ export const languageSEOMap: Record<string, Record<string, AdvancedSEOData>> = {
     }
   },
 
+   'sweet-sixteen': {
+    en: {
+      title: 'Sweet Sixteen Birthday Cards | Celebrate in Style',
+      description: 'Design glamorous Sweet Sixteen birthday cards with animations, music, and heartfelt wishes.',
+      keywords: ['sweet sixteen cards', '16th birthday wishes', 'milestone birthday cards'],
+      ogTitle: 'Sweet Sixteen - Free & Personalized Cards',
+      ogDescription: 'Celebrate Sweet Sixteen with stunning personalized cards featuring music and animations.',
+      lang: 'en',
+      structuredData: {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Sweet Sixteen Celebration",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "description": "Create and share Sweet Sixteen birthday cards online",
+        "inLanguage": "en",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    },
+    hi: {
+      title: 'स्वीट सिक्सटीन जन्मदिन कार्ड | स्टाइल में जश्न मनाएं',
+      description: 'एनिमेशन, म्यूजिक और प्यारे संदेशों के साथ स्वीट सिक्सटीन कार्ड डिज़ाइन करें।',
+      keywords: ['स्वीट सिक्सटीन कार्ड', '16वां जन्मदिन शुभकामनाएं', 'माइलस्टोन जन्मदिन'],
+      ogTitle: 'स्वीट सिक्सटीन - मुफ्त और पर्सनलाइज्ड कार्ड',
+      ogDescription: 'संगीत और एनिमेशन के साथ शानदार स्वीट सिक्सटीन कार्ड बनाएं और भेजें।',
+      lang: 'hi'
+    }
+    // ... other languages
+  },
+
+  'milestone-birthday': {
+    en: {
+      title: 'Milestone Birthday Cards | Celebrate Big Moments',
+      description: 'Send milestone birthday greetings for 18th, 21st, 30th, 50th birthdays and more.',
+      keywords: ['milestone birthday cards', 'big birthday celebrations', 'birthday wishes online'],
+      ogTitle: 'Milestone Birthdays - Celebrate Big Moments',
+      ogDescription: 'Mark life’s milestones with beautiful birthday cards online.',
+      lang: 'en',
+      structuredData: {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Milestone Birthday Celebration",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "description": "Create and share milestone birthday cards online",
+        "inLanguage": "en",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    }
+    // ... translations
+  },
+
+  'holi': {
+    en: {
+      title: 'Holi Cards | Festival of Colors Greetings',
+      description: 'Send colorful animated Holi cards with music and vibrant designs.',
+      keywords: ['holi greetings', 'festival of colors cards', 'happy holi online'],
+      ogTitle: 'Happy Holi - Free & Colorful Cards',
+      ogDescription: 'Celebrate Holi with free animated greeting cards online.',
+      lang: 'en',
+      structuredData: {
+        "@context": "https://schema.org",
+        "@type": "Festival",
+        "name": "Holi Festival",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "description": "Celebrate Holi with animated greeting cards online",
+        "inLanguage": "en",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    }
+    // ... translations
+  },
+  
   // Eid (Arabic)
   eid_ar: {
     ar: {

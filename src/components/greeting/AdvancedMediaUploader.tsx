@@ -127,20 +127,77 @@ const AdvancedMediaUploader = ({
       return { valid: false, message: 'Invalid URL format' };
     }
     
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    
-    const extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    
-    if (type === 'image' && !imageExtensions.includes(extension)) {
-      return { valid: false, message: 'Not a valid image URL' };
-    }
-    
-    if (type === 'video' && !videoExtensions.includes(extension)) {
-      return { valid: false, message: 'Not a valid video URL' };
-    }
-    
+     // Standard file extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+  
+  // Social media and cloud storage domains
+  const mediaDomains = {
+    image: [
+      'instagram.com', 'flickr.com', 'imgur.com', 'pinterest.com',
+      'unsplash.com', 'pexels.com', 'pixabay.com', 'twimg.com', // Twitter images
+      'fbcdn.net', // Facebook CDN
+      'cdn.discordapp.com', 'media.discordapp.net', 'data:'
+    ],
+    video: [
+      'youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com',
+      'twitch.tv', 'facebook.com', 'fb.watch', 'tiktok.com',
+      'streamable.com', 'cdn.discordapp.com'
+    ]
+  };
+
+  // Check standard file extensions
+  const extension = url.substring(url.lastIndexOf('.')).toLowerCase();
+  
+  if (type === 'image' && imageExtensions.includes(extension)) {
     return { valid: true, message: '' };
+  }
+  
+  if (type === 'video' && videoExtensions.includes(extension)) {
+    return { valid: true, message: '' };
+  }
+
+  // Check for social media/cloud URLs
+  const domain = new URL(url).hostname.replace('www.', '');
+  
+  if (type === 'image' && mediaDomains.image.some(d => domain.includes(d) || url.includes('data:'))) {
+    return { valid: true, message: '' };
+  }
+  
+  if (type === 'video' && mediaDomains.video.some(d => domain.includes(d))) {
+    return { valid: true, message: '' };
+  }
+
+  // Check for common image/video URL patterns without extensions
+  const imagePatterns = [
+    /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i, // URLs with query params
+    /\/media\/[\w-]+\.(jpg|jpeg|png|gif|webp|svg)/i,
+    /\/images?\/[\w-]+/i
+  ];
+  
+  const videoPatterns = [
+    /\/video\/[\w-]+/i,
+    /\/v\/[\w-]+/i,
+    /\/watch\?v=[\w-]+/i, // YouTube
+    /youtu\.be\/[\w-]+/i, // YouTube short links
+    /\/clip\/[\w-]+/i
+  ];
+
+  if (type === 'image' && imagePatterns.some(pattern => pattern.test(url))) {
+    return { valid: true, message: '' };
+  }
+  
+  if (type === 'video' && videoPatterns.some(pattern => pattern.test(url))) {
+    return { valid: true, message: '' };
+  }
+
+  return { 
+    valid: false, 
+    message: type === 'image' 
+      ? 'Not a valid image URL or supported platform' 
+      : 'Not a valid video URL or supported platform' 
+  };
+    
   };
 
   const usagePercentage = Math.round((media.length / maxItems) * 100);
@@ -174,12 +231,15 @@ const AdvancedMediaUploader = ({
             onClick={() => addMedia('image')}
             disabled={media.length >= maxItems}
             size="sm"
-            variant={media.length === 0 ? "default" : "outline"}
-            className={`gap-1 min-w-[100px] ${
-              media.length === 0 
-                ? "bg-primary/50 hover:bg-primary/80" 
-                : ""
-            }`}
+            variant='outline'
+            className={`gap-1 min-w-[100px]`}
+
+            //  variant={media.length === 0 ? "default" : "outline"}
+            // className={`gap-1 min-w-[100px] ${
+            //   media.length === 0 
+            //     ? "bg-primary/50 hover:bg-primary/80" 
+            //     : ""
+            // }`}
           >
             <Image className="h-3.5 w-3.5" />
             <span className="truncate">
@@ -202,12 +262,8 @@ const AdvancedMediaUploader = ({
             onClick={() => addMedia('video')}
             disabled={media.length >= maxItems}
             size="sm"
-            variant={media.length === 0 ? "default" : "outline"}
-            className={`gap-1 min-w-[100px] ${
-              media.length === 0 
-                ? "bg-primary/50 hover:bg-primary/90" 
-                : ""
-            }`}
+            variant='outline'
+            className={`gap-1 min-w-[100px]`}
           >
             <Video className="h-3.5 w-3.5" />
             <span className="truncate">
@@ -254,18 +310,18 @@ const AdvancedMediaUploader = ({
             <div className="flex gap-2 justify-center">
               <Button 
                 onClick={() => addMedia('image')} 
-                variant="default"
+                variant="outline"
                 size="sm"
-                className="gap-1"
+                className="gap-1 bg-primary/10 text-primary"
               >
-                <Image className="h-3.5 w-3.5" />
+                <Image className="h-3.5 w-3.5 " />
                 Add Image
               </Button>
               <Button 
                 onClick={() => addMedia('video')} 
-                variant="default" 
+                variant="outline" 
                 size="sm"
-                className="gap-1"
+                className="gap-1 bg-primary/10 text-primary"
               >
                 <Video className="h-3.5 w-3.5" />
                 Add Video
@@ -318,14 +374,14 @@ const AdvancedMediaUploader = ({
                             )}
                           </div>
                           
-                          <div className="overflow-hidden">
+                          {/* <div className="overflow-hidden">
                             <Label className="text-xs font-medium truncate">
                               {item.type === 'image' ? 'Image' : 'Video'} {index + 1}
                             </Label>
                             <p className="text-xs text-muted-foreground truncate">
                               {item.url ? item.url : 'No URL provided'}
                             </p>
-                          </div>
+                          </div> */}
                           
                           {!urlValidation.valid && item.url && (
                             <Badge variant="destructive" className="text-xs">
@@ -426,7 +482,6 @@ const AdvancedMediaUploader = ({
                           placeholder={`Enter ${item.type} URL...`}
                           className="text-sm"
                         />
-                       
                       </div>
 
                       {item.url && (

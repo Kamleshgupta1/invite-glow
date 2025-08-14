@@ -8,6 +8,8 @@ import ShareActions from '@/components/share/ShareActions';
 import SEOManager from '@/components/seo/SEOManager';
 import { motion, AnimatePresence } from 'framer-motion';
 import TypingText from '../components/reusableTypingText/TypingText'
+import { useLanguageTranslation } from '@/hooks/useLanguageTranslation';
+
 
 const Index = () => {
   const location = useLocation();
@@ -16,6 +18,7 @@ const Index = () => {
   const [currentEvent, setCurrentEvent] = useState<EventType | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const greetingRef = useRef<HTMLDivElement>(null);
+  const { translate } = useLanguageTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -99,9 +102,6 @@ const Index = () => {
     }
     if (greetingData?.senderName) {
       params.append('senderName', greetingData.senderName);
-    }
-    if (greetingData?.customEventName) {
-      params.append('customEventName', greetingData.customEventName);
     }
     navigate(`/create?${params.toString()}`);
   };
@@ -294,12 +294,12 @@ const Index = () => {
 
 <Button
   onClick={shareWithSomeoneElse}
-  size="lg"
-  className="relative overflow-hidden group animate-zoom-in shadow-2xl hover:shadow-primary/30 transition-all duration-500 bg-gradient-to-r from-pink-500 to-violet-500 hover:bg-gradient-to-l"
+  size="sm"
+  className="p-5 relative overflow-hidden group animate-zoom-in shadow-2xl hover:shadow-primary/30 transition-all duration-500 bg-gradient-to-r from-pink-500 to-violet-500 hover:bg-gradient-to-l"
 >
   <span className="relative z-10 flex items-center">
     <span className="mr-3 text-2xl group-hover:animate-spin">✨</span>
-    <span>Customize and share others</span>
+    <span>Customize and share with others</span>
   </span>
   
   {/* Button shine effect */}
@@ -405,7 +405,7 @@ const Index = () => {
 
         {/* Gradient heading */}
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-shift">
-          Beautiful Greetings
+          {translate('Beautiful Greetings')}
         </h1>
 
         {/* Description */}
