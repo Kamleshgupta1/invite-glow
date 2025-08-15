@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,20 +14,51 @@ interface BorderCustomizerProps {
   onChange: (settings: BorderSettings) => void;
 }
 
-const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
-  console.log('BorderCustomizer settings:', settings);
-  console.log('decorativeElements type:', typeof settings.decorativeElements, settings.decorativeElements);
-  const updateSettings = (field: keyof BorderSettings, value: any) => {
-    if (typeof settings[field] === 'object' && settings[field] !== null) {
-      onChange({ ...settings, [field]: { ...settings[field] as object, ...value } });
-    } else {
-      onChange({ ...settings, [field]: value });
+const normalizeColorValue = (color: string) => {
+  if (color.startsWith('hsl(var(')) {
+    const varName = color.match(/var\(([^)]+)\)/)?.[1];
+    if (varName) {
+      const computedValue = getComputedStyle(document.documentElement)
+        .getPropertyValue(varName.trim());
+      return computedValue || '#ffffff';
     }
+    return '#ffffff';
+  }
+  return color;
+};
+
+const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
+  const [internalSettings, setInternalSettings] = useState<BorderSettings>({
+    ...settings,
+    decorativeElements: Array.isArray(settings.decorativeElements) 
+      ? settings.decorativeElements 
+      : [],
+    color: normalizeColorValue(settings.color || '#000000')
+  });
+
+  // Sync with parent settings
+  useEffect(() => {
+    setInternalSettings({
+      ...settings,
+      decorativeElements: Array.isArray(settings.decorativeElements) 
+        ? settings.decorativeElements 
+        : [],
+      color: normalizeColorValue(settings.color || '#000000')
+    });
+  }, [settings]);
+
+  const updateSettings = (field: keyof BorderSettings, value: any) => {
+    const newSettings = {
+      ...internalSettings,
+      [field]: value
+    };
+    setInternalSettings(newSettings);
+    onChange(newSettings);
   };
 
-  const addBorderElement = () => {
-    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
-    if (elements.length >= 5) return;
+  const addBorderElement = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (internalSettings.decorativeElements.length >= 5) return;
     
     const newElement: BorderElement = {
       id: Date.now().toString(),
@@ -38,21 +69,24 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
       animation: 'float'
     };
     
-    updateSettings('decorativeElements', [...elements, newElement]);
+    const newElements = [...internalSettings.decorativeElements, newElement];
+    updateSettings('decorativeElements', newElements);
   };
 
-  const removeBorderElement = (id: string) => {
-    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
-    updateSettings('decorativeElements', elements.filter(el => el.id !== id));
+  const removeBorderElement = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newElements = internalSettings.decorativeElements.filter(el => el.id !== id);
+    updateSettings('decorativeElements', newElements);
   };
 
   const updateBorderElement = (id: string, field: keyof BorderElement, value: any) => {
-    const elements = Array.isArray(settings.decorativeElements) ? settings.decorativeElements : [];
-    const updatedElements = elements.map(el =>
+    const updatedElements = internalSettings.decorativeElements.map(el =>
       el.id === id ? { ...el, [field]: value } : el
     );
     updateSettings('decorativeElements', updatedElements);
   };
+
+  console.log('Current border elements:', internalSettings.decorativeElements);
 
   return (
     <Card className="border border-gray-300 rounded-xl shadow-lg">
@@ -63,22 +97,20 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Enable Border */}
         <div className="flex items-center justify-between">
           <Label>Enable Border</Label>
           <Switch
-            checked={settings.enabled}
+            checked={internalSettings.enabled}
             onCheckedChange={(enabled) => updateSettings('enabled', enabled)}
           />
         </div>
 
-        {settings.enabled && (
+        {internalSettings.enabled && (
           <>
-            {/* Border Style */}
             <div className="space-y-3">
               <Label>Border Style</Label>
               <Select
-                value={settings.style}
+                value={internalSettings.style}
                 onValueChange={(style) => updateSettings('style', style)}
               >
                 <SelectTrigger>
@@ -92,11 +124,10 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
               </Select>
             </div>
 
-            {/* Border Width */}
             <div className="space-y-3">
-              <Label>Border Width ({settings.width}px)</Label>
+              <Label>Border Width ({internalSettings.width}px)</Label>
               <Slider
-                value={[settings.width]}
+                value={[internalSettings.width]}
                 onValueChange={([width]) => updateSettings('width', width)}
                 min={1}
                 max={20}
@@ -104,33 +135,38 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
               />
             </div>
 
-            {/* Border Color */}
             <div className="space-y-3">
               <Label>Border Color</Label>
               <Input
                 type="color"
-                value={settings.color}
+                value={internalSettings.color}
                 onChange={(e) => updateSettings('color', e.target.value)}
                 className="w-full h-10"
               />
             </div>
 
-            {/* Border Elements */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Border Elements ({Array.isArray(settings.decorativeElements) ? settings.decorativeElements.length : 0}/5)</Label>
+                <Label className="flex items-center gap-2">Border Elements 
+                 
+                                <span className="bg-primary/10 text-primary">( {internalSettings.decorativeElements.length}/5)</span>
+                  </Label>
                 <Button
                   size="sm"
                   onClick={addBorderElement}
-                  disabled={Array.isArray(settings.decorativeElements) ? settings.decorativeElements.length >= 5 : false}
+                  disabled={internalSettings.decorativeElements.length >= 5}
                   className="h-8"
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>
               
-              {Array.isArray(settings.decorativeElements) ? settings.decorativeElements.map((element) => (
-                <div key={element.id} className="border rounded p-3 space-y-2">
+              {internalSettings.decorativeElements.map((element) => (
+                <div 
+                  key={element.id} 
+                  className="border rounded p-3 space-y-2 hover:bg-gray-50 transition-colors"
+                  onClick={(e) => e.stopPropagation()} // Prevent event bubbling
+                >
                   <div className="flex items-center justify-between">
                     <Select
                       value={element.type}
@@ -147,7 +183,7 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => removeBorderElement(element.id)}
+                      onClick={(e) => removeBorderElement(element.id, e)}
                       className="h-8 w-8 p-0"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -159,9 +195,10 @@ const BorderCustomizer = ({ settings, onChange }: BorderCustomizerProps) => {
                     onChange={(e) => updateBorderElement(element.id, 'content', e.target.value)}
                     placeholder={element.type === 'emoji' ? 'Enter emoji' : 'Enter image URL'}
                     className="text-xs"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
-              )) : null}
+              ))}
             </div>
           </>
         )}

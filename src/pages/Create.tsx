@@ -18,10 +18,9 @@ import AdvancedTextEditor from '@/components/greeting/AdvancedTextEditor';
 import LayoutSelector from '@/components/greeting/LayoutSelector';
 import BackgroundCustomizer from '@/components/greeting/BackgroundCustomizer';
 import EmojiSelector from '@/components/greeting/EmojiSelector';
-import BorderCustomizer from '@/components/border/BorderCustomizer';
+import BorderCustomizer from '@/components/greeting/BorderCustomizer';
 import LanguageSelector from '@/components/language/LanguageSelector';
 import ShareActions from '@/components/share/ShareActions';
-import LivePreview from '@/components/greeting/LivePreview';
 import Preview from '@/components/greeting/Preview';
 import SEOManager from '@/components/seo/SEOManager';
 import BackButton from '@/components/ui/back-button';
@@ -34,7 +33,6 @@ const Create = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { translate } = useLanguageTranslation();
   
@@ -45,8 +43,7 @@ const Create = () => {
     texts: [],
     media: [],
     videoUrl: '',
-    videoPosition: { x: 50, y: 50, width: 400, height: 300 },
-    audioUrl: '',
+    videoPosition: {width: 400, height: 300 },
     animationStyle: 'fade',
     layout: 'grid',
     theme: '',
@@ -103,7 +100,6 @@ useEffect(() => {
         texts: [{ 
           id: Date.now().toString(),
           content: event.defaultMessage,
-          position: { x: 50, y: 50 },
           style: { 
             fontSize: '24px', 
             fontWeight: 'normal', 
@@ -203,7 +199,7 @@ useEffect(() => {
     });
 
     
-    navigate(`/?${params.toString()}`);
+    navigate(`/?${formData.toString()}`);
     
   };
 
@@ -230,7 +226,7 @@ useEffect(() => {
             ✨ {translate('Create Your Greeting')}
           </h1>
            <p className="text-lg md:text-xl text-muted-foreground font-medium animate-typing overflow-hidden  border-r-4 border-r-primary">
-            Design a beautiful, personalized greeting to share with someone special
+            {translate('Design a beautiful, personalized greeting to share with someone special')}
           </p>
         </div>
         <div className="grid lg:grid-cols-2 gap-8">
@@ -319,6 +315,8 @@ useEffect(() => {
                 emojis={formData.emojis}
                 onChange={(emojis) => setFormData(prev => ({ ...prev, emojis }))}
               />
+
+        
 
               <Separator />
 
@@ -411,7 +409,7 @@ useEffect(() => {
 </CardHeader>
   <CardContent>
     {formData.eventType ? (
-      <LivePreview greetingData={formData} selectedEvent={selectedEvent} showVisualEditor={showVisualEditor} />
+      <Preview greetingData={formData} selectedEvent={selectedEvent} />
     ) : (
       <div className="text-center text-muted-foreground py-12">
         <div className="text-4xl mb-4">🎨</div>

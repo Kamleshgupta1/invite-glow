@@ -57,12 +57,12 @@ export const validateGreetingForm = (data: GreetingFormData): ValidationError[] 
   }
 
   // Validate audio URL if provided
-  if (data.audioUrl && !isValidUrl(data.audioUrl)) {
-    errors.push({
-      field: 'audioUrl',
-      message: 'Please provide a valid audio URL'
-    });
-  }
+  // if (data.audioUrl && !isValidUrl(data.audioUrl)) {
+  //   errors.push({
+  //     field: 'audioUrl',
+  //     message: 'Please provide a valid audio URL'
+  //   });
+  // }
 
   // Validate emoji positions
   data.emojis.forEach((emoji, index) => {

@@ -1,4 +1,4 @@
-// AdvancedTextEditor.tsx
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,7 +52,7 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
   const removeText = (index: number) => {
     const newTexts = texts.filter((_, i) => i !== index);
     onChange(newTexts);
-    setActiveTextIndex(null);
+    if (activeTextIndex === index) setActiveTextIndex(null);
   };
 
   const updateText = (index: number, field: keyof TextContent, value: any) => {
@@ -80,8 +80,47 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
     setActiveTextIndex(newIndex);
   };
 
-  const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px'];
-  const fontWeights = ['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+  // Combined options from both versions
+  const fontSizes = [
+    { value: '12px', label: 'Small (12px)' },
+    { value: '14px', label: 'Regular (14px)' },
+    { value: '16px', label: 'Medium (16px)' },
+    { value: '18px', label: 'Large (18px)' },
+    { value: '20px', label: 'X-Large (20px)' },
+    { value: '24px', label: 'XX-Large (24px)' },
+    { value: '28px', label: 'XX-Large (28px)' },
+    { value: '32px', label: 'XXX-Large (32px)' },
+    { value: '36px', label: 'XXX-Large (36px)' },
+    { value: '48px', label: 'Huge (48px)' }
+  ];
+
+  const fontWeights = [
+    { value: 'normal', label: 'Normal' },
+    { value: 'bold', label: 'Bold' },
+    { value: '100', label: 'Thin (100)' },
+    { value: '200', label: 'Extra Light (200)' },
+    { value: '300', label: 'Light (300)' },
+    { value: '400', label: 'Regular (400)' },
+    { value: '500', label: 'Medium (500)' },
+    { value: '600', label: 'Semi Bold (600)' },
+    { value: '700', label: 'Bold (700)' },
+    { value: '800', label: 'Extra Bold (800)' },
+    { value: '900', label: 'Black (900)' }
+  ];
+
+  const colors = [
+    { value: 'hsl(var(--foreground))', label: 'Default' },
+    { value: 'hsl(var(--primary))', label: 'Primary' },
+    { value: 'hsl(var(--secondary))', label: 'Secondary' },
+    { value: 'hsl(var(--muted-foreground))', label: 'Muted' },
+    { value: 'hsl(0 0% 100%)', label: 'White' },
+    { value: 'hsl(0 0% 0%)', label: 'Black' },
+    { value: 'hsl(0 70% 50%)', label: 'Red' },
+    { value: 'hsl(120 60% 40%)', label: 'Green' },
+    { value: 'hsl(220 90% 50%)', label: 'Blue' },
+    { value: 'hsl(45 90% 50%)', label: 'Yellow' }
+  ];
+
   const textAligns = ['left', 'center', 'right'] as const;
 
   return (
@@ -105,11 +144,9 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
             disabled={texts.length >= MAX_TEXT_LIMIT}
             size="sm"
             variant='outline'
-            //  variant={texts.length === 0 ? "default" : "outline"}
             className={cn(
               "transition-all duration-300",
               texts.length === 0 ? "gap-2" : "gap-1",
-              // texts.length === 0 ? "gap-2 bg-primary/50 hover:bg-primary/90" : "gap-1",
               isAddingText && "animate-pulse"
             )}
           >
@@ -184,6 +221,24 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
 
                 {activeTextIndex === index && (
                   <div className="space-y-3 border-t pt-3 animate-in fade-in">
+                    {/* Preview section from Version 1 */}
+                    {text.content && (
+                      <div className="p-3 border rounded">
+                        <Label className="text-xs text-muted-foreground">Preview:</Label>
+                        <div
+                          style={{
+                            fontSize: text.style.fontSize,
+                            fontWeight: text.style.fontWeight,
+                            color: text.style.color,
+                            textAlign: text.style.textAlign
+                          }}
+                          className="mt-1"
+                        >
+                          {text.content}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label className="text-xs mb-1 block">Font Size</Label>
@@ -196,8 +251,8 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
                           </SelectTrigger>
                           <SelectContent>
                             {fontSizes.map((size) => (
-                              <SelectItem key={size} value={size} className="text-xs">
-                                {size}
+                              <SelectItem key={size.value} value={size.value} className="text-xs">
+                                {size.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -214,8 +269,8 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
                           </SelectTrigger>
                           <SelectContent>
                             {fontWeights.map((weight) => (
-                              <SelectItem key={weight} value={weight} className="text-xs">
-                                {weight === 'normal' ? 'Normal' : weight === 'bold' ? 'Bold' : weight}
+                              <SelectItem key={weight.value} value={weight.value} className="text-xs">
+                                {weight.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -233,12 +288,27 @@ const AdvancedTextEditor = ({ texts, onChange }: AdvancedTextEditorProps) => {
                             onChange={(e) => updateText(index, 'style', { color: e.target.value })}
                             className="h-8 w-8 p-0 border-none"
                           />
-                          <Input
+                          <Select
                             value={text.style.color}
-                            onChange={(e) => updateText(index, 'style', { color: e.target.value })}
-                            className="h-8 text-xs"
-                            placeholder="Enter color value"
-                          />
+                            onValueChange={(value) => updateText(index, 'style', { color: value })}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select color" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {colors.map((color) => (
+                                <SelectItem key={color.value} value={color.value} className="text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <div 
+                                      className="w-4 h-4 rounded border" 
+                                      style={{ backgroundColor: color.value }}
+                                    />
+                                    {color.label}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       <div>

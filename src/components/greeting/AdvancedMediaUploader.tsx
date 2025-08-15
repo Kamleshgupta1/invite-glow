@@ -30,26 +30,34 @@ const AdvancedMediaUploader = ({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Reset active index if it's out of bounds
     if (activeMediaIndex !== null && activeMediaIndex >= media.length) {
       setActiveMediaIndex(null);
     }
   }, [media.length, activeMediaIndex]);
 
-  const addMedia = (type: 'image' | 'video') => {
-    if (media.length < maxItems) {
-      const newMedia: MediaItem = {
-        id: Date.now().toString(),
-        url: '',
-        type,
-        position: { x: 10, y: 10, width: 300, height: 200 },
-        animation: 'fade',
-        priority: media.length + 1
-      };
-      onChange([...media, newMedia]);
-      setActiveMediaIndex(media.length); // Auto-open the new media
-    }
+ // Updated addMedia function
+const addMedia = (type: 'image' | 'video') => {
+  if (media.length >= maxItems) return;
+
+  const newMedia: MediaItem = {
+    id: Date.now().toString(),
+    url: '',
+    type,
+    position: { width: 300, height: 200 },
+    animation: 'fade',
+    priority: media.length + 1
   };
+
+  const updatedMedia = [...media, newMedia];
+  onChange(updatedMedia);
+  setActiveMediaIndex(updatedMedia.length - 1);
+
+  // Scroll to the new item after a small delay
+  setTimeout(() => {
+    const element = document.getElementById(`media-item-${updatedMedia.length - 1}`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+};
 
   const removeMedia = (index: number) => {
     const newMedia = media.filter((_, i) => i !== index);
@@ -104,7 +112,6 @@ const AdvancedMediaUploader = ({
     newMedia.splice(dragIndex, 1);
     newMedia.splice(index, 0, draggedItem);
     
-    // Update priorities
     newMedia.forEach((item, idx) => {
       item.priority = idx + 1;
     });
@@ -118,7 +125,7 @@ const AdvancedMediaUploader = ({
     setDragIndex(null);
   };
 
-  const validateUrl = (url: string, type: 'image' | 'video') => {
+  const validateUrl = (url: string, type: 'image' | 'video' | 'audio') => {
     if (!url) return { valid: false, message: 'URL is required' };
     
     try {
@@ -126,78 +133,200 @@ const AdvancedMediaUploader = ({
     } catch {
       return { valid: false, message: 'Invalid URL format' };
     }
+
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.flac'];
+
+    const mediaPlatforms = {
+      image: [
+        'facebook.com', 'fb.com', 'instagram.com', 'twitter.com', 'x.com',
+        'tiktok.com', 'pinterest.com', 'reddit.com', 'tumblr.com',
+        'drive.google.com', 'dropbox.com', 'onedrive.live.com', 'box.com',
+        'flickr.com', 'imgur.com', '500px.com', 'unsplash.com',
+        'tinder.com', 'bumble.com', 'hinge.com'
+      ],
+      video: [
+        'facebook.com', 'fb.com', 'instagram.com', 'twitter.com', 'x.com',
+        'tiktok.com', 'vimeo.com', 'dailymotion.com', 'twitch.tv',
+        'drive.google.com', 'dropbox.com', 'onedrive.live.com',
+        'streamable.com', 'gfycat.com', 'coub.com'
+      ],
+      audio: [
+        'spotify.com', 'youtube.com', 'youtu.be', 'soundcloud.com',
+        'apple.com/music', 'deezer.com', 'tidal.com', 'jiosaavn.com',
+        'gaana.com', 'wynk.in',
+        'anchor.fm', 'podcasts.google.com', 'breaker.audio',
+        'drive.google.com', 'dropbox.com', 'onedrive.live.com'
+      ]
+    };
+
+    const extension = url.substring(url.lastIndexOf('.')).toLowerCase();
     
-     // Standard file extensions
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
-  
-  // Social media and cloud storage domains
-  const mediaDomains = {
-    image: [
-      'instagram.com', 'flickr.com', 'imgur.com', 'pinterest.com',
-      'unsplash.com', 'pexels.com', 'pixabay.com', 'twimg.com', // Twitter images
-      'fbcdn.net', // Facebook CDN
-      'cdn.discordapp.com', 'media.discordapp.net', 'data:'
-    ],
-    video: [
-      'youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com',
-      'twitch.tv', 'facebook.com', 'fb.watch', 'tiktok.com',
-      'streamable.com', 'cdn.discordapp.com'
-    ]
+    if (type === 'image' && imageExtensions.includes(extension)) {
+      return { valid: true, message: '' };
+    }
+    
+    if (type === 'video' && videoExtensions.includes(extension)) {
+      return { valid: true, message: '' };
+    }
+
+    if (type === 'audio' && audioExtensions.includes(extension)) {
+      return { valid: true, message: '' };
+    }
+
+    const domain = new URL(url).hostname.replace('www.', '');
+
+    if (type === 'image' && mediaPlatforms.image.some(d => domain.includes(d))) {
+      return { 
+        valid: false, 
+        message: 'Use direct image URL or embed code',
+        embeddable: true
+      };
+    }
+    
+    if (type === 'video' && mediaPlatforms.video.some(d => domain.includes(d))) {
+      return { 
+        valid: false, 
+        message: 'Use embed code for this platform',
+        embeddable: true
+      };
+    }
+
+    if (type === 'audio' && mediaPlatforms.audio.some(d => domain.includes(d))) {
+      return { 
+        valid: false, 
+        message: 'Use direct audio file or embed code',
+        embeddable: true
+      };
+    }
+
+    return { 
+      valid: false, 
+      message: `Not a valid ${type} URL or supported platform` 
+    };
   };
 
-  // Check standard file extensions
-  const extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-  
-  if (type === 'image' && imageExtensions.includes(extension)) {
-    return { valid: true, message: '' };
-  }
-  
-  if (type === 'video' && videoExtensions.includes(extension)) {
-    return { valid: true, message: '' };
-  }
+  const getEmbedCode = (url: string, type: 'image' | 'video' | 'audio') => {
+    const domain = new URL(url).hostname.replace('www.', '');
 
-  // Check for social media/cloud URLs
-  const domain = new URL(url).hostname.replace('www.', '');
-  
-  if (type === 'image' && mediaDomains.image.some(d => domain.includes(d) || url.includes('data:'))) {
-    return { valid: true, message: '' };
-  }
-  
-  if (type === 'video' && mediaDomains.video.some(d => domain.includes(d))) {
-    return { valid: true, message: '' };
-  }
+    if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
+      const videoId = url.includes('youtube.com') 
+        ? new URL(url).searchParams.get('v')
+        : url.split('youtu.be/')[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
 
-  // Check for common image/video URL patterns without extensions
-  const imagePatterns = [
-    /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i, // URLs with query params
-    /\/media\/[\w-]+\.(jpg|jpeg|png|gif|webp|svg)/i,
-    /\/images?\/[\w-]+/i
-  ];
-  
-  const videoPatterns = [
-    /\/video\/[\w-]+/i,
-    /\/v\/[\w-]+/i,
-    /\/watch\?v=[\w-]+/i, // YouTube
-    /youtu\.be\/[\w-]+/i, // YouTube short links
-    /\/clip\/[\w-]+/i
-  ];
+    if (domain.includes('instagram.com')) {
+      const postId = url.split('/p/')[1]?.split('/')[0];
+      return postId ? `https://www.instagram.com/p/${postId}/embed` : null;
+    }
 
-  if (type === 'image' && imagePatterns.some(pattern => pattern.test(url))) {
-    return { valid: true, message: '' };
-  }
-  
-  if (type === 'video' && videoPatterns.some(pattern => pattern.test(url))) {
-    return { valid: true, message: '' };
-  }
+    if (domain.includes('twitter.com') || domain.includes('x.com')) {
+      const tweetId = url.split('/status/')[1]?.split('?')[0];
+      return tweetId ? `https://twitframe.com/show?url=${encodeURIComponent(url)}` : null;
+    }
 
-  return { 
-    valid: false, 
-    message: type === 'image' 
-      ? 'Not a valid image URL or supported platform' 
-      : 'Not a valid video URL or supported platform' 
+    if (domain.includes('facebook.com') || domain.includes('fb.com')) {
+      return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}`;
+    }
+
+    if (domain.includes('tiktok.com')) {
+      const videoId = url.split('/video/')[1]?.split('?')[0];
+      return videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : null;
+    }
+
+    if (domain.includes('spotify.com')) {
+      const trackId = url.split('track/')[1]?.split('?')[0];
+      return trackId ? `https://open.spotify.com/embed/track/${trackId}` : null;
+    }
+
+    if (domain.includes('soundcloud.com')) {
+      return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}`;
+    }
+
+    if (domain.includes('drive.google.com')) {
+      if (url.includes('/file/d/')) {
+        const fileId = url.split('/file/d/')[1]?.split('/')[0];
+        return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : null;
+      }
+      return null;
+    }
+
+    return null;
   };
+
+  const renderMediaPreview = (item: MediaItem, index: number) => {
+    const urlValidation = validateUrl(item.url, item.type);
     
+    if (item.type === 'image') {
+      const embedUrl = getEmbedCode(item.url, 'image');
+      
+      if (embedUrl) {
+        return (
+          <div className="relative w-full h-24">
+            <iframe
+              src={embedUrl}
+              className="w-full h-full rounded"
+              frameBorder="0"
+              allowFullScreen
+            ></iframe>
+          </div>
+        );
+      }
+
+      return (
+        <img
+          src={item.url}
+          alt={`Preview ${index + 1}`}
+          className={`w-full h-24 object-contain rounded ${
+            !urlValidation.valid ? 'opacity-50' : ''
+          }`}
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'text-center py-4 text-muted-foreground text-xs';
+            errorMsg.textContent = urlValidation.message || 'Failed to load image';
+            e.currentTarget.parentNode?.appendChild(errorMsg);
+          }}
+        />
+      );
+    } 
+    else if (item.type === 'video') {
+      const embedUrl = getEmbedCode(item.url, 'video');
+      
+      if (embedUrl) {
+        return (
+          <div className="relative w-full h-24">
+            <iframe
+              src={embedUrl}
+              className="w-full h-full rounded"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        );
+      }
+
+      return (
+        <video
+          src={item.url}
+          className={`w-full h-24 object-contain rounded ${
+            !urlValidation.valid ? 'opacity-50' : ''
+          }`}
+          controls
+          muted
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'text-center py-4 text-muted-foreground text-xs';
+            errorMsg.textContent = urlValidation.message || 'Failed to load video';
+            e.currentTarget.parentNode?.appendChild(errorMsg);
+          }}
+        />
+      );
+    }
   };
 
   const usagePercentage = Math.round((media.length / maxItems) * 100);
@@ -206,80 +335,73 @@ const AdvancedMediaUploader = ({
     <Card className="border border-pink-300 shadow-lg">
       <CardHeader className="pb-2">
         <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4">
-  <div className="flex items-center gap-2 min-w-0">
-    <div className="relative shrink-0">
-      <Image className="h-4 w-4" />
-      <Video className="h-3 w-3 absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
-    </div>
-    <span className="text-sm font-medium truncate">Media Content</span>
-    <Badge 
-      className={`shrink-0 ml-1 ${
-        media.length === maxItems 
-          ? "bg-destructive/10 text-destructive" 
-          : "bg-primary/10 text-primary"
-      }`}
-    >
-      {media.length}/{maxItems}
-    </Badge>
-  </div>
-  
-  <div className="flex gap-2 justify-end xs:justify-normal">
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            onClick={() => addMedia('image')}
-            disabled={media.length >= maxItems}
-            size="sm"
-            variant='outline'
-            className={`gap-1 min-w-[100px]`}
-
-            //  variant={media.length === 0 ? "default" : "outline"}
-            // className={`gap-1 min-w-[100px] ${
-            //   media.length === 0 
-            //     ? "bg-primary/50 hover:bg-primary/80" 
-            //     : ""
-            // }`}
-          >
-            <Image className="h-3.5 w-3.5" />
-            <span className="truncate">
-              {media.length > 0 ? 'Add More' : 'Add Image'}
-            </span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          {media.length >= maxItems 
-            ? 'Maximum media limit reached' 
-            : (media.length > 0 ? 'Add another image' : 'Add first image')}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-    
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            onClick={() => addMedia('video')}
-            disabled={media.length >= maxItems}
-            size="sm"
-            variant='outline'
-            className={`gap-1 min-w-[100px]`}
-          >
-            <Video className="h-3.5 w-3.5" />
-            <span className="truncate">
-              {media.length > 0 ? 'Add More' : 'Add Video'}
-            </span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          {media.length >= maxItems 
-            ? 'Maximum media limit reached' 
-            : (media.length > 0 ? 'Add another video' : 'Add first video')}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  </div>
-</div>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="relative shrink-0">
+              <Image className="h-4 w-4" />
+              <Video className="h-3 w-3 absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
+            </div>
+            <span className="text-sm font-medium truncate">Media Content</span>
+            <Badge 
+              className={`shrink-0 ml-1 ${
+                media.length === maxItems 
+                  ? "bg-destructive/10 text-destructive" 
+                  : "bg-primary/10 text-primary"
+              }`}
+            >
+              {media.length}/{maxItems}
+            </Badge>
+          </div>
+          
+          <div className="flex gap-2 justify-end xs:justify-normal">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => addMedia('image')}
+                    disabled={media.length >= maxItems}
+                    size="sm"
+                    variant='outline'
+                    className={`gap-1 min-w-[100px]`}
+                  >
+                    <Image className="h-3.5 w-3.5" />
+                    <span className="truncate">
+                      {media.length > 0 ? 'Add More' : 'Add Image'}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {media.length >= maxItems 
+                    ? 'Maximum media limit reached' 
+                    : (media.length > 0 ? 'Add another image' : 'Add first image')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => addMedia('video')}
+                    disabled={media.length >= maxItems}
+                    size="sm"
+                    variant='outline'
+                    className={`gap-1 min-w-[100px]`}
+                  >
+                    <Video className="h-3.5 w-3.5" />
+                    <span className="truncate">
+                      {media.length > 0 ? 'Add More' : 'Add Video'}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {media.length >= maxItems 
+                    ? 'Maximum media limit reached' 
+                    : (media.length > 0 ? 'Add another video' : 'Add first video')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
         <div className="mt-3">
           <Progress value={usagePercentage} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -374,18 +496,9 @@ const AdvancedMediaUploader = ({
                             )}
                           </div>
                           
-                          {/* <div className="overflow-hidden">
-                            <Label className="text-xs font-medium truncate">
-                              {item.type === 'image' ? 'Image' : 'Video'} {index + 1}
-                            </Label>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {item.url ? item.url : 'No URL provided'}
-                            </p>
-                          </div> */}
-                          
                           {!urlValidation.valid && item.url && (
                             <Badge variant="destructive" className="text-xs">
-                              Invalid
+                              {urlValidation.message.includes('embed') ? 'Needs embed' : 'Invalid'}
                             </Badge>
                           )}
                         </div>
@@ -480,44 +593,13 @@ const AdvancedMediaUploader = ({
                           value={item.url}
                           onChange={(e) => updateMedia(index, 'url', e.target.value)}
                           placeholder={`Enter ${item.type} URL...`}
-                          className="text-sm"
+                          className="text-sm break-all overflow-hidden text-ellipsis whitespace-nowrap"
                         />
                       </div>
 
                       {item.url && (
                         <div className="border rounded p-2 bg-muted/20">
-                          {item.type === 'image' ? (
-                            <img
-                              src={item.url}
-                              alt={`Preview ${index + 1}`}
-                              className={`w-full h-24 object-contain rounded ${
-                                !urlValidation.valid ? 'opacity-50' : ''
-                              }`}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                const errorMsg = document.createElement('div');
-                                errorMsg.className = 'text-center py-4 text-muted-foreground text-xs';
-                                errorMsg.textContent = 'Failed to load image';
-                                e.currentTarget.parentNode?.appendChild(errorMsg);
-                              }}
-                            />
-                          ) : (
-                            <video
-                              src={item.url}
-                              className={`w-full h-24 object-contain rounded ${
-                                !urlValidation.valid ? 'opacity-50' : ''
-                              }`}
-                              controls
-                              muted
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                const errorMsg = document.createElement('div');
-                                errorMsg.className = 'text-center py-4 text-muted-foreground text-xs';
-                                errorMsg.textContent = 'Failed to load video';
-                                e.currentTarget.parentNode?.appendChild(errorMsg);
-                              }}
-                            />
-                          )}
+                          {renderMediaPreview(item, index)}
                         </div>
                       )}
 
@@ -530,33 +612,7 @@ const AdvancedMediaUploader = ({
                             transition={{ duration: 0.2 }}
                             className="space-y-3 border-t pt-3 overflow-hidden"
                           >
-                            {/* Position Controls */}
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label className="text-xs">X Position (%)</Label>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  value={item.position.x}
-                                  onChange={(e) => updateMedia(index, 'position', { x: parseInt(e.target.value) || 0 })}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Y Position (%)</Label>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  value={item.position.y}
-                                  onChange={(e) => updateMedia(index, 'position', { y: parseInt(e.target.value) || 0 })}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Size Controls */}
+                            {/* Size Controls - Only width and height remain */}
                             <div className="grid grid-cols-2 gap-2">
                               <div>
                                 <Label className="text-xs">Width (px)</Label>

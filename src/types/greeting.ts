@@ -15,13 +15,13 @@ export interface MediaItem {
   url: string;
   type: 'image' | 'video';
   position: {
-    x: number;
-    y: number;
     width: number;
     height: number;
   };
   animation: string;
   priority: number;
+  fileType?: string; // Add this for better video handling
+
 }
 
 export interface TextContent {
@@ -46,12 +46,9 @@ export interface GreetingFormData {
   media: MediaItem[];
   videoUrl: string;
   videoPosition: {
-    x: number;
-    y: number;
     width: number;
     height: number;
   };
-  audioUrl: string;
   animationStyle: string;
   layout: 'grid' | 'masonry' | 'carousel' | 'stack' | 'collage';
   theme: string;

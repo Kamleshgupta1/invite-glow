@@ -1,11 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
+// Type definitions
 export interface Language {
   code: string;
   name: string;
   flag: string;
   direction?: 'ltr' | 'rtl';
 }
+
+type TranslationValue = string | { [key: string]: TranslationValue };
+type TranslationDictionary = Record<string, TranslationValue>;
+type TranslationParams = Record<string, string | number>;
 
 export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -65,8 +70,8 @@ export const languages: Language[] = [
   { code: 'ca', name: 'Català', flag: '🇪🇸' }
 ];
 
-// Translations for common greeting terms
-const translations: Record<string, Record<string, string>> = {
+  // Translations for common greeting terms
+const translations: TranslationDictionary = {
   'Create Your Greeting': {
     hi: 'अपना अभिवादन बनाएं',
     bn: 'আপনার শুভেচ্ছা তৈরি করুন',
@@ -1089,64 +1094,171 @@ const translations: Record<string, Record<string, string>> = {
   
 };
 
+// Helper type for plural forms
+interface PluralForms {
+  zero?: string;
+  one?: string;
+  two?: string;
+  few?: string;
+  many?: string;
+  other: string;
+}
+
 export const useLanguageTranslation = () => {
-  const [currentLanguage, setCurrentLanguage] = useState(() => {
-    // Detect user's language from browser or localStorage
-    const savedLang = localStorage.getItem('preferredLanguage');
-    // if (savedLang) return savedLang;
-    if (savedLang && languages.find(lang => lang.code === savedLang)) {
-      return savedLang;
+  const [currentLanguage, setCurrentLanguage] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'en';
+    
+    try {
+      const savedLang = localStorage.getItem('preferredLanguage');
+      if (savedLang && languages.some(l => l.code === savedLang)) {
+        return savedLang;
+      }
+
+      const browserLang = navigator.language.split('-')[0];
+      const matchedLang = languages.find(l => l.code === browserLang);
+      return matchedLang?.code || 'en';
+    } catch (e) {
+      console.error('Language detection failed:', e);
+      return 'en';
     }
-    const browserLang = navigator.language.split('-')[0];
-    return languages.find(lang => lang.code === browserLang)?.code || 'en';
   });
 
-  useEffect(() => {
-    // Save language preference to localStorage
-    localStorage.setItem('preferredLanguage', currentLanguage);
-    
-    // Set document direction for RTL languages
-    const language = languages.find(lang => lang.code === currentLanguage);
-    if (language?.direction === 'rtl') {
-      document.documentElement.dir = 'rtl';
-    } else {
-      document.documentElement.dir = 'ltr';
-    }
-    // Set language attribute for better accessibility
-    document.documentElement.lang = currentLanguage;
-  }, [currentLanguage]);
-
-
-  // Memoized translate function to prevent unnecessary re-renders
-  const translate = useMemo(() => {
-    return (key: string): string => {
-      const translation = translations[key]?.[currentLanguage];
-      if (translation) return translation;
-      // Fallback to English if available
-      const englishTranslation = translations[key]?.['en'];
-      if (englishTranslation) return englishTranslation;
-      // Return key as fallback
-      return key;
-    };
-  }, [currentLanguage]);
-
-
-  const changeLanguage = useCallback((languageCode: string) => {
-    if (languages.find(lang => lang.code === languageCode)) {
-      setCurrentLanguage(languageCode);
-    }
-  }, []);
-
-
-  const getCurrentLanguage = useMemo(() => {
+  const getCurrentLanguage = useMemo((): Language => {
     return languages.find(lang => lang.code === currentLanguage) || languages[0];
   }, [currentLanguage]);
 
+  const isRTL = useMemo(() => getCurrentLanguage.direction === 'rtl', [getCurrentLanguage]);
 
-  const isRTL = useMemo(() => {
-    return getCurrentLanguage.direction === 'rtl';
-  }, [getCurrentLanguage]);
+  const applyLanguageSettings = useCallback((langCode: string): void => {
+    try {
+      const lang = languages.find(l => l.code === langCode) || languages[0];
+      
+      // Update HTML attributes
+      document.documentElement.lang = langCode;
+      document.documentElement.dir = lang.direction || 'ltr';
+      
+      // Update class for RTL styling
+      document.documentElement.classList.toggle('rtl', lang.direction === 'rtl');
+    } catch (e) {
+      console.error('Failed to apply language settings:', e);
+    }
+  }, []);
 
+  const changeLanguage = useCallback((langCode: string): void => {
+    if (!languages.some(l => l.code === langCode)) {
+      console.warn(`Language ${langCode} is not supported`);
+      return;
+    }
+    
+    try {
+      setCurrentLanguage(langCode);
+      localStorage.setItem('preferredLanguage', langCode);
+      applyLanguageSettings(langCode);
+      
+      window.dispatchEvent(new CustomEvent('languageChanged', { 
+        detail: { language: langCode } 
+      }));
+    } catch (e) {
+      console.error('Failed to change language:', e);
+    }
+  }, [applyLanguageSettings]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      applyLanguageSettings(currentLanguage);
+    }
+  }, [currentLanguage, applyLanguageSettings]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'preferredLanguage' && e.newValue) {
+        setCurrentLanguage(e.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const getTranslationValue = useCallback((keys: string[]): TranslationValue | undefined => {
+    let value: TranslationValue = translations;
+    
+    for (const k of keys) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        value = value[k];
+      } else {
+        return undefined;
+      }
+    }
+    
+    return value;
+  }, []);
+
+  const translate = useCallback((key: string, params?: TranslationParams): string => {
+    try {
+      const keys = key.split('.');
+      const value = getTranslationValue(keys);
+      
+      // Get translation with fallbacks
+      let translation: string | undefined;
+      
+      if (typeof value === 'object' && value !== null) {
+        translation = value[currentLanguage] as string || value['en'] as string;
+      } else if (typeof value === 'string') {
+        translation = value;
+      }
+      
+      if (!translation) return key;
+
+      // Handle parameter substitution
+      if (params) {
+        return Object.entries(params).reduce((str, [k, v]) => {
+          return str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+        }, translation);
+      }
+      
+      return translation;
+    } catch (e) {
+      console.error(`Translation failed for key "${key}":`, e);
+      return key;
+    }
+  }, [currentLanguage, getTranslationValue]);
+
+  const pluralize = useCallback((key: string, count: number): string => {
+    try {
+      const translation = getTranslationValue(key.split('.'));
+      
+      if (!translation || typeof translation !== 'object') {
+        return typeof translation === 'string' ? translation : key;
+      }
+
+      const pluralForms = translation as unknown as PluralForms;
+      
+      switch (currentLanguage) {
+        case 'ar': // Arabic
+          if (count === 0) return pluralForms.zero || pluralForms.other || key;
+          if (count === 1) return pluralForms.one || pluralForms.other || key;
+          if (count === 2) return pluralForms.two || pluralForms.other || key;
+          if (count > 2 && count < 11) return pluralForms.few || pluralForms.other || key;
+          return pluralForms.other || key;
+        
+        case 'ru': // Russian
+        case 'uk': // Ukrainian
+          // Add specific rules as needed
+          break;
+      }
+      
+      // Default English-style pluralization
+      return count === 1 
+        ? pluralForms.one || pluralForms.other || key
+        : pluralForms.other || key;
+    } catch (e) {
+      console.error(`Pluralization failed for key "${key}":`, e);
+      return key;
+    }
+  }, [currentLanguage, getTranslationValue]);
 
   return {
     currentLanguage,
@@ -1154,7 +1266,11 @@ export const useLanguageTranslation = () => {
     translate,
     languages,
     getCurrentLanguage,
-    isRTL
+    isRTL,
+    pluralize,
+    t: translate,
+    setLanguage: changeLanguage,
+    getAvailableLanguages: useCallback(() => languages, []),
+    isLanguageSupported: useCallback((code: string) => languages.some(l => l.code === code), []),
   };
-
-};
+}; 

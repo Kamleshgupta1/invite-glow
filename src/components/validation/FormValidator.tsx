@@ -19,9 +19,9 @@ export class FormValidator {
       errors.push({ field: 'videoUrl', message: 'Please enter a valid video URL' });
     }
 
-    if (data.audioUrl && !this.isValidURL(data.audioUrl)) {
-      errors.push({ field: 'audioUrl', message: 'Please enter a valid audio URL' });
-    }
+    // if (data.audioUrl && !this.isValidURL(data.audioUrl)) {
+    //   errors.push({ field: 'audioUrl', message: 'Please enter a valid audio URL' });
+    // }
 
     // Media validations
     data.media.forEach((item, index) => {
@@ -50,38 +50,31 @@ export class FormValidator {
       }
     });
 
-    // Position validations
+    // Text content length validation
     data.texts.forEach((text, index) => {
-      if (text.position.x < 0 || text.position.x > 100) {
+      if (text.content.length > 500) {
         errors.push({ 
-          field: `texts[${index}].position.x`, 
-          message: `Text ${index + 1} X position must be between 0 and 100` 
-        });
-      }
-      
-      if (text.position.y < 0 || text.position.y > 100) {
-        errors.push({ 
-          field: `texts[${index}].position.y`, 
-          message: `Text ${index + 1} Y position must be between 0 and 100` 
+          field: `texts[${index}].content`, 
+          message: `Text ${index + 1} content is too long (max 500 characters)` 
         });
       }
     });
 
     // Media position validations
     data.media.forEach((item, index) => {
-      if (item.position.x < 0 || item.position.x > 100) {
-        errors.push({ 
-          field: `media[${index}].position.x`, 
-          message: `Media ${index + 1} X position must be between 0 and 100` 
-        });
-      }
+      // if (item.position.x < 0 || item.position.x > 100) {
+      //   errors.push({ 
+      //     field: `media[${index}].position.x`, 
+      //     message: `Media ${index + 1} X position must be between 0 and 100` 
+      //   });
+      // }
       
-      if (item.position.y < 0 || item.position.y > 100) {
-        errors.push({ 
-          field: `media[${index}].position.y`, 
-          message: `Media ${index + 1} Y position must be between 0 and 100` 
-        });
-      }
+      // if (item.position.y < 0 || item.position.y > 100) {
+      //   errors.push({ 
+      //     field: `media[${index}].position.y`, 
+      //     message: `Media ${index + 1} Y position must be between 0 and 100` 
+      //   });
+      // }
 
       if (item.position.width < 50 || item.position.width > 1000) {
         errors.push({ 

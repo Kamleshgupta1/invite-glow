@@ -63,7 +63,8 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
           <Button
             onClick={() => setShowPicker(!showPicker)}
             size="sm"
-            className="bg-primary/50 hover:bg-primary/80 text-white"
+            variant="outline"
+            // className="bg-primary/50 hover:bg-primary/80 text-white"
           >
             <Plus className="h-3 w-3 mr-1" />
             Add Emoji

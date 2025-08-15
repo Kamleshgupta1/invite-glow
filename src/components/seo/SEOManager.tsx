@@ -3,27 +3,41 @@ import { useLanguageTranslation } from '@/hooks/useLanguageTranslation';
 import { generateAdvancedSEO, updateAdvancedPageSEO } from '@/utils/seoEnhanced';
 
 interface SEOManagerProps {
+  title?: string;
+  description?: string;
   eventType?: string;
   customEventName?: string;
   isPreview?: boolean;
 }
 
-const SEOManager = ({ eventType = 'greeting', customEventName, isPreview = false }: SEOManagerProps) => {
+
+const SEOManager = ({ 
+  title,
+  description,
+  eventType = 'greeting', 
+  customEventName, 
+  isPreview = false 
+}: SEOManagerProps) => {
   const { currentLanguage } = useLanguageTranslation();
 
   useEffect(() => {
-    // Determine the event type for SEO
+    // Use the passed title/description if they exist
+    const finalTitle = title || `${customEventName || eventType} Greeting Cards | Create & Share Free`;
+    const finalDescription = description || `Create beautiful ${customEventName || eventType} greeting cards with animations, music, and custom messages.`;
+
     const seoEventType = eventType === 'custom' && customEventName 
       ? customEventName.toLowerCase().replace(/\s+/g, '-')
       : eventType;
 
-    // Generate SEO data based on current language and event type
     const seoData = generateAdvancedSEO(seoEventType, currentLanguage);
 
-    // Update page title for custom events
+    // Override with custom title/description if provided
+    if (title) seoData.title = title;
+    if (description) seoData.description = description;
+
     if (eventType === 'custom' && customEventName) {
-      seoData.title = `${customEventName} Greeting Cards | Create & Share Free`;
-      seoData.description = `Create beautiful ${customEventName} greeting cards with animations, music, and custom messages.`;
+      seoData.title = finalTitle;
+      seoData.description = finalDescription;
       seoData.ogTitle = `${customEventName} Greeting Cards - Free & Personalized`;
       seoData.ogDescription = `Create and share stunning ${customEventName} greeting cards with custom animations, music, and messages.`;
       seoData.keywords = [
@@ -34,17 +48,16 @@ const SEOManager = ({ eventType = 'greeting', customEventName, isPreview = false
       ];
     }
 
-    // Add preview-specific modifications
     if (isPreview) {
       seoData.title = `Preview: ${seoData.title}`;
       seoData.robots = 'noindex, nofollow';
     }
 
-    // Apply SEO updates
     updateAdvancedPageSEO(seoData);
-  }, [eventType, customEventName, currentLanguage, isPreview]);
+  }, [eventType, customEventName, currentLanguage, isPreview, title, description]);
 
-  return null; // This is a utility component that doesn't render anything
+  return null;
 };
+
 
 export default SEOManager;
