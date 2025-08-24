@@ -26,7 +26,7 @@ const LayoutSelector = ({
 
   return (
     <Card>
-      <CardContent className="border border-orange-300 rounded-xl shadow-lg space-y-4 pt-6">
+      <CardContent className="space-y-4 pt-6">
         <div>
           <Label htmlFor="layout">Photo Layout Design</Label>
           <Select value={layout} onValueChange={onLayoutChange}>
@@ -37,8 +37,7 @@ const LayoutSelector = ({
               {layoutStyles.map((style) => (
                 <SelectItem key={style.value} value={style.value}>
                   <div>
-                    <div>{style.label}</div> 
-                    {/* className="flex justify-start" */}
+                    <div>{style.label}</div>
                     <div className="text-xs text-muted-foreground">
                       {layoutDescriptions[style.value as keyof typeof layoutDescriptions]}
                     </div>

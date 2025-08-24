@@ -1,5 +1,3 @@
-import { BorderSettings } from '@/types/background';
-
 export interface EventType {
   value: string;
   label: string;
@@ -7,26 +5,28 @@ export interface EventType {
   defaultMessage: string;
   theme: string;
   backgroundImage?: string;
-  category: 'birthday' | 'religious' | 'national' | 'seasonal' | 'personal' | 'special' | 'custom';
+  category: 'birthday' | 'religious' | 'national' | 'seasonal' | 'personal' | 'custom';
 }
 
 export interface MediaItem {
-  id: string;
   url: string;
   type: 'image' | 'video';
   position: {
+    x: number;
+    y: number;
     width: number;
     height: number;
   };
   animation: string;
   priority: number;
-  fileType?: string; // Add this for better video handling
-
 }
 
 export interface TextContent {
-  id: string;
   content: string;
+  position: {
+    x: number;
+    y: number;
+  };
   style: {
     fontSize: string;
     fontWeight: string;
@@ -38,18 +38,20 @@ export interface TextContent {
 
 export interface GreetingFormData {
   eventType: string;
-  customEventName?: string;
-  customEventEmoji?: string;
   senderName: string;
   receiverName: string;
   texts: TextContent[];
   media: MediaItem[];
   videoUrl: string;
   videoPosition: {
+    x: number;
+    y: number;
     width: number;
     height: number;
   };
+  audioUrl: string;
   animationStyle: string;
+  customCSS: string;
   layout: 'grid' | 'masonry' | 'carousel' | 'stack' | 'collage';
   theme: string;
   backgroundSettings: {
@@ -72,11 +74,9 @@ export interface GreetingFormData {
     };
   };
   emojis: {
-    id: string;
     emoji: string;
     position: { x: number; y: number };
     size: number;
     animation: string;
   }[];
-  borderSettings: BorderSettings;
 }

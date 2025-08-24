@@ -92,8 +92,6 @@ export const eventTypes: EventType[] = [
     theme: 'card-raksha-bandhan',
     category: 'religious'
   },
-  { value: 'hanukkah', label: 'Hanukkah', emoji: '🕎', defaultMessage: 'Wishing you light, joy, and peace this Hanukkah!', theme: 'card-hanukkah', category: 'religious' },
-  { value: 'easter', label: 'Easter', emoji: '🐣', defaultMessage: 'Happy Easter! May your day be filled with joy, hope, and renewal.', theme: 'card-easter', category: 'religious' },
 
   // National Holidays
   { 
@@ -120,9 +118,6 @@ export const eventTypes: EventType[] = [
     theme: 'card-gandhi',
     category: 'national'
   },
-  { value: 'bastille-day', label: 'Bastille Day', emoji: '🇫🇷', defaultMessage: 'Vive la France! Celebrating liberty, equality, and fraternity!', theme: 'card-bastille', category: 'national' },
-  { value: 'fourth-of-july', label: 'Fourth of July', emoji: '🇺🇸', defaultMessage: 'Happy Independence Day USA! Celebrate freedom and unity!', theme: 'card-fourth-july', category: 'national' },
-
 
   // Seasonal Festivals
   { 
@@ -157,19 +152,7 @@ export const eventTypes: EventType[] = [
     theme: 'card-pongal',
     category: 'seasonal'
   },
-  { value: 'thanksgiving', label: 'Thanksgiving', emoji: '🦃', defaultMessage: 'Wishing you a harvest of blessings, good health, and good times!', theme: 'card-thanksgiving', category: 'seasonal' },
-  { value: 'chinese-new-year', label: 'Chinese New Year', emoji: '🧧', defaultMessage: 'Happy Lunar New Year! Wishing you luck, prosperity, and joy!', theme: 'card-chinese-new-year', category: 'seasonal' },
 
-
-  // Global Observances & Special Days
-  { value: 'valentines-day', label: 'Valentine’s Day', emoji: '❤️', defaultMessage: 'Happy Valentine’s Day! Wishing you love and happiness!', theme: 'card-valentine', category: 'special' },
-  { value: 'new-year', label: 'New Year', emoji: '🎆', defaultMessage: 'Happy New Year! Wishing you a year full of joy, success, and health!', theme: 'card-new-year', category: 'special' },
-  { value: 'womens-day', label: 'International Women’s Day', emoji: '👩‍🦰', defaultMessage: 'Celebrating the strength, achievements, and spirit of women everywhere!', theme: 'card-womens-day', category: 'special' },
-  { value: 'fathers-day', label: 'Father’s Day', emoji: '👨‍👧‍👦', defaultMessage: 'Happy Father’s Day! Thank you for your love and guidance.', theme: 'card-fathers-day', category: 'special' },
-  { value: 'mothers-day', label: 'Mother’s Day', emoji: '👩‍👧‍👦', defaultMessage: 'Happy Mother’s Day! Thank you for your endless love and care.', theme: 'card-mothers-day', category: 'special' },
-  { value: 'world-environment-day', label: 'World Environment Day', emoji: '🌍', defaultMessage: 'Let’s protect our planet for future generations!', theme: 'card-environment', category: 'special' },
-
-  
   // Personal Milestones
   { 
     value: 'anniversary', 

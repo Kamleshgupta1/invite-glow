@@ -55,7 +55,7 @@ const BackgroundCustomizer = ({ settings, onChange }: BackgroundCustomizerProps)
   ];
 
   return (
-    <Card className="border border-purple-300 rounded-xl shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="text-sm flex items-center gap-2">
           <Palette className="h-4 w-4" />

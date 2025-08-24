@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Smile } from 'lucide-react';
+
 import { EmojiItem } from '@/types/background';
 
 interface EmojiSelectorProps {
@@ -24,7 +25,6 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
 
   const addEmoji = (selectedEmoji?: string) => {
     const newEmoji: EmojiItem = {
-      id: Date.now().toString(),
       emoji: selectedEmoji || '🎉',
       position: { x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 },
       size: 24,
@@ -53,30 +53,28 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
   };
 
   return (
-    <Card className="border border-red-300 shadow-lg rounded-xl overflow-hidden">
-      <CardHeader className=" py-3">
+    <Card>
+      <CardHeader>
         <CardTitle className="text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Smile className="h-4 w-4" />
-            Decorative Emojis <span className="bg-primary/10 text-primary">({emojis.length})</span>
+            Decorative Emojis ({emojis.length})
           </div>
           <Button
             onClick={() => setShowPicker(!showPicker)}
             size="sm"
             variant="outline"
-            // className="bg-primary/50 hover:bg-primary/80 text-white"
           >
             <Plus className="h-3 w-3 mr-1" />
             Add Emoji
           </Button>
         </CardTitle>
       </CardHeader>
-
       <CardContent className="space-y-4">
         {showPicker && (
-          <Card className="border-primary/20 shadow-md rounded-lg overflow-hidden">
-            <CardHeader className="pb-2 ">
-              <Label className="text-xs text-gray-800">Choose an Emoji</Label>
+          <Card className="border-primary/20">
+            <CardHeader className="pb-2">
+              <Label className="text-xs">Choose an Emoji</Label>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-8 gap-1 mb-3">
@@ -86,7 +84,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                     onClick={() => addEmoji(emoji)}
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-lg hover:bg-gradient-to-tr hover:from-pink-200 hover:via-purple-200 hover:to-indigo-200 transition-colors"
+                    className="h-8 w-8 p-0 text-lg hover:bg-primary/10"
                   >
                     {emoji}
                   </Button>
@@ -95,7 +93,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
               <div className="flex gap-2">
                 <Input
                   placeholder="Or type any emoji..."
-                  className="text-center text-lg border-pink-300 focus:border-purple-400"
+                  className="text-center text-lg"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && e.currentTarget.value) {
                       addEmoji(e.currentTarget.value);
@@ -107,7 +105,6 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                   onClick={() => setShowPicker(false)}
                   variant="ghost"
                   size="sm"
-                  className="bg-red-100 hover:bg-red-200 text-red-600"
                 >
                   Cancel
                 </Button>
@@ -120,19 +117,19 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
           <div className="text-center py-8 text-muted-foreground">
             <Smile className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>No decorative emojis added yet</p>
-            <Button
-              onClick={() => setShowPicker(true)}
-              className="mt-2 bg-primary/10 text-primary"
-              size="sm"
-               variant="outline" 
+            <Button 
+              onClick={() => setShowPicker(true)} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
             >
-             🌹 Add Your First Emoji
+              Add Your First Emoji
             </Button>
           </div>
         )}
 
         {emojis.map((emoji, index) => (
-          <Card key={index} className="border border-purple-200 rounded-lg">
+          <Card key={index} className="border">
             <CardContent className="p-3">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -143,7 +140,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                   onClick={() => removeEmoji(index)}
                   size="sm"
                   variant="ghost"
-                  className="h-6 px-2 text-red-500 hover:bg-red-50"
+                  className="h-6 px-2 text-destructive"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -158,7 +155,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                     max="100"
                     value={emoji.position.x}
                     onChange={(e) => updateEmoji(index, 'position', { x: parseInt(e.target.value) || 0 })}
-                    className="h-7 text-xs border-pink-200 focus:border-purple-400"
+                    className="h-7 text-xs"
                   />
                 </div>
                 <div>
@@ -169,7 +166,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                     max="100"
                     value={emoji.position.y}
                     onChange={(e) => updateEmoji(index, 'position', { y: parseInt(e.target.value) || 0 })}
-                    className="h-7 text-xs border-pink-200 focus:border-purple-400"
+                    className="h-7 text-xs"
                   />
                 </div>
                 <div>
@@ -180,7 +177,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                     max="100"
                     value={emoji.size}
                     onChange={(e) => updateEmoji(index, 'size', parseInt(e.target.value) || 24)}
-                    className="h-7 text-xs border-pink-200 focus:border-purple-400"
+                    className="h-7 text-xs"
                   />
                 </div>
               </div>
@@ -190,7 +187,7 @@ const EmojiSelector = ({ emojis, onChange }: EmojiSelectorProps) => {
                 <Input
                   value={emoji.emoji}
                   onChange={(e) => updateEmoji(index, 'emoji', e.target.value)}
-                  className="h-7 text-center text-lg border-pink-200 focus:border-purple-400"
+                  className="h-7 text-center text-lg"
                   maxLength={4}
                 />
               </div>
